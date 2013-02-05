@@ -1,0 +1,9 @@
+{
+    "firefoxProfile": "/home/fjospidie/.mozilla/firefox/81gw2ef7.default",
+    "databaseHost": "localhost",
+    "databasePort": "3306",
+    "databaseUser": "fjospidie",
+    "databasePassword": "foobar",
+    "snortConfig": "/etc/snort/snort.conf",
+    "database": "fjospidie"
+}
