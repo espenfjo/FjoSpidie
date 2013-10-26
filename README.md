@@ -9,6 +9,9 @@ This HAR is used to create a PNG over all the domains visited.
 A tcpdump will also be recored of the session. The tcpdump will be run through snort to search for known threats or issues.
 Any autodownloaded file will be stored in the database for later review.
 
+PS. There may be some code somewhere in there to click on every link on every page of a web site as well.
+It will probably hurt a lot to enable it, if its still there :)
+
 Requirements
 ============
 * xfvb
