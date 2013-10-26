@@ -11,6 +11,7 @@ Any autodownloaded file will be stored in the database for later review.
 
 PS. There may be some code somewhere in there to click on every link on every page of a web site as well.
 It will probably hurt a lot to enable it, if its still there :)
+PPS: There are also a lot of methods and functions thats not used, especially in webrunner and the files around there.
 
 Requirements
 ============
