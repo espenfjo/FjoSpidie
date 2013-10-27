@@ -32,6 +32,10 @@ Usage
 =====
 Run `run.sh --url http://www.google.com` to analyse google.com.
 
+Web Interface
+=============
+The FjoSpidie Web interface can be found here:
+https://github.com/espenfjo/fjospidie-interface
 
 
 
