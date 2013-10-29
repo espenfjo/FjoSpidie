@@ -9,6 +9,8 @@ public class Configuration {
 	private String databasePort;
 	private String database;
 	private String url;
+	private String useragent;
+	private String referer;
 	private String firefoxProfile;
 	private String UUID;
 
@@ -70,6 +72,20 @@ public class Configuration {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	public String getUserAgent() {
+		return useragent;
+	}
+
+	public void setUserAgent(String ua) {
+		this.useragent = ua;
+	}
+	public String getReferer() {
+		return referer;
+	}
+
+	public void setReferer(String referer) {
+		this.referer = referer;
 	}
 
 	public String getFirefoxProfile() {

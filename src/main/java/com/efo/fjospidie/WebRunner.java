@@ -40,13 +40,20 @@ public class WebRunner {
 	static boolean one = true;
 	static URL currentPage;
 	static boolean firstRequest = false;
-
+        static String referer = "http://www.google.com/search?q=hei+&oq=SUP&sourceid=firefox&ie=UTF-8";
+        static String useragent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2b5) Gecko/20091204 Firefox/3.6b5 Java/1.7.0_11";
 	static HarLog runWebDriver(URL startURL, int port) {
 		LOG.i(WebRunner.class, "Starting WebRunner");
+		if ( FjoSpidie.configuration.getReferer() != null ) {
+		        referer = FjoSpidie.configuration.getReferer();
+		}
+		if ( FjoSpidie.configuration.getUserAgent() != null ) {
+		        useragent = FjoSpidie.configuration.getUserAgent();
+		}
 
-
+		
 		ProxyServer server = new ProxyServer(port);
-
+		
 		try {
 			server.start();
 			server.setCaptureHeaders(true);
@@ -55,13 +62,13 @@ public class WebRunner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		server.addHeader("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2b5) Gecko/20091204 Firefox/3.6b5 Java/1.7.0_11");
+
+		server.addHeader("User-Agent", useragent);
 		server.addHeader("Accept-Encoding", "");
 		RequestInterceptor interceptor = new RequestInterceptor() {
 			public void process(BrowserMobHttpRequest arg0) {
 				if (firstRequest == false) {
-					arg0.addRequestHeader("Referer",
-							"http://www.google.com/search?q=hei+&oq=SUP&sourceid=firefox&ie=UTF-8");
+				        arg0.addRequestHeader("Referer", referer);							
 					firstRequest = true;
 				}
 			}

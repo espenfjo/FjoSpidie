@@ -124,10 +124,12 @@ public class FjoSpidie {
 		CommandLine cmd = null;
 		Options options = new Options();
 		options.addOption("u", "url", true, "Url of site to scan");
+		options.addOption("r", "referer", true, "Referer of the request");
+		options.addOption("a", "useragent", true, "The useragent to use");
 		options.addOption("s", "snortconf", true, "Snort configuration file");
 		options.addOption("c", "configurationfile", true, "FjoSpidie configuration file");
 		options.addOption("f", "firefoxprofile", true, "FjoSpidie Firefox Profile directory");
-		options.addOption("u", "uuid", true, "UUID of report");
+		options.addOption("i", "uuid", true, "UUID of report");
 
 
 		CommandLineParser parser = new PosixParser();
@@ -163,7 +165,12 @@ public class FjoSpidie {
 		configuration.setUUID(cmd.getOptionValue("uuid"));
 		configuration.setUrl(cmd.getOptionValue("url"));
 		
-
+		if (cmd.getOptionValue("referer") != null) {
+		    configuration.setReferer(cmd.getOptionValue("referer"));
+		}
+		if (cmd.getOptionValue("useragent") != null) {
+		    configuration.setUserAgent(cmd.getOptionValue("useragent"));
+		}
 	}
 
 	/**
@@ -201,7 +208,7 @@ public class FjoSpidie {
 	 * All entries have at least one Host header. Add it to the Nodes list if it
 	 * is not there already (For example from a previous Location header).
 	 * 
-	 * If we have a referrer header, find its {@link com.efo.fjospidie.Node} and
+	 * If we have a referer header, find its {@link com.efo.fjospidie.Node} and
 	 * set it as parent for this {@link com.efo.fjospidie.Node} unless we
 	 * already have this {@link com.efo.fjospidie.Node} from a previous Location
 	 * header. Should always have its parent in the Node list.
