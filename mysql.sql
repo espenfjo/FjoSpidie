@@ -34,7 +34,7 @@ CREATE TABLE `alert` (
   PRIMARY KEY (`id`),
   KEY `FK_report_id` (`report_id`),
   CONSTRAINT `FK_report_id` FOREIGN KEY (`report_id`) REFERENCES `report` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2187 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,7 +73,7 @@ CREATE TABLE `entry` (
   PRIMARY KEY (`id`),
   KEY `fk_entry_id` (`report_id`),
   CONSTRAINT `fk_entry_id` FOREIGN KEY (`report_id`) REFERENCES `report` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=635806 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,7 +90,7 @@ CREATE TABLE `graph` (
   PRIMARY KEY (`id`),
   KEY `FK_report_id_graph` (`report_id`),
   CONSTRAINT `FK_report_id_graph` FOREIGN KEY (`report_id`) REFERENCES `report` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2275 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -109,7 +109,7 @@ CREATE TABLE `header` (
   PRIMARY KEY (`id`),
   KEY `fk_entry_header` (`entry_id`),
   CONSTRAINT `fk_entry_header` FOREIGN KEY (`entry_id`) REFERENCES `entry` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8694389 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -127,7 +127,7 @@ CREATE TABLE `pcap` (
   PRIMARY KEY (`id`),
   KEY `fk_pcap_report` (`report_id`),
   CONSTRAINT `fk_pcap_report` FOREIGN KEY (`report_id`) REFERENCES `report` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2306 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -145,7 +145,7 @@ CREATE TABLE `report` (
   `uuid` varchar(36) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `report_uuid` (`uuid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2425 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -168,7 +168,7 @@ CREATE TABLE `request` (
   PRIMARY KEY (`id`),
   KEY `fk_request_id` (`entry_id`),
   CONSTRAINT `fk_request_id` FOREIGN KEY (`entry_id`) REFERENCES `entry` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=634597 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +189,7 @@ CREATE TABLE `response` (
   PRIMARY KEY (`id`),
   KEY `fk_response_id` (`entry_id`),
   CONSTRAINT `fk_response_id` FOREIGN KEY (`entry_id`) REFERENCES `entry` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=634598 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
