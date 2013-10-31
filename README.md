@@ -21,7 +21,7 @@ Requirements
 
 Build
 =====
-Run `mvn package`
+Run `install.sh` and then run `mvn package`
 
 
 Configuration
