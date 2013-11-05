@@ -22,7 +22,6 @@ class Node:
                 """We have an old connection, but do we have an old connection
                    with the same HTTP status code (OK, REDIRECT etc)?"""
                 if status == self.status:
-                    print "HER"
                     existing_pnode.incrementNumberOfLinks()
                     already_exists = True
                     break

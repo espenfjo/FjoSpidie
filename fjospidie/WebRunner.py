@@ -66,14 +66,14 @@ def run_webdriver(start_url, port, config):
         har = proxy.har
         logging.info("Stopping WebRunner")
         proxy.close()
-        #    server.stop()
+        server.stop()
         webdriver.quit()
         har = Har(har)
     except Exception, e:
-        print e
+        logging.error(e)
         proxy.close()
         webdriver.quit()
-        #       server.stop()
+        server.stop()
     return har
 
 

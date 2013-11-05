@@ -20,6 +20,17 @@ class Graph:
 
 
     def calculate_nodes(self):
+        """ This function loops through all HTTP connections and maps all
+        Nodes and ParentNodes.
+        If the response header has a 301/302 (rewrite/redirect) we add the
+        Location as a Node, and sets the Node from the Host header as its parent.
+        
+        All entries have at least one Host header. Add it to the Nodes list if it
+        is not there already (For example from a previous Location header).
+        
+        If we have a referer header, find its Node and set it as parent for this Node 
+        unless we already have this Node from a previous Location
+        header. Should always have its parent in the Node list."""
         for entry in self.entries:
             status = entry.response.status
             headers = entry.request.headers + entry.response.headers
@@ -55,6 +66,7 @@ class Graph:
 
 
     def add_node_if_not_exists(self, node, entry):
+        """Adds a Node to the Node list if it is not already in the list."""
         alreadyExisting = False
         for n in self.nodes:
             # We have seen this connection earlier
@@ -72,6 +84,8 @@ class Graph:
 
 
     def fill_nodes(self):
+        """Loops through a list of Node objects and adds
+          them to the GraphViz object as Dot Nodes."""
         for node in self.nodes:
             self.graph.add_node(pydot.Node(node.label))
 
