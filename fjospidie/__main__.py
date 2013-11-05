@@ -1,0 +1,2 @@
+import fjospidie
+fjospidie.initialise()
