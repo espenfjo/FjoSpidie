@@ -1,7 +1,11 @@
-FjoSpidie
+FjoSpidie v2
 =========
 
 FjoSpidie Honey Client
+
+This time the spider is written in Python instead of Java.
+
+This version isnt done yet, but it is in development, and the code is lighter, and it has lighter requirements.
 
 This Honey Client will launch Firefox against a given URL and create a HAR of the URL.
 
@@ -14,9 +18,17 @@ Requirements
 ============
 * xfvb
 * python
-* postgresql
+* libpq-dev
+* java
 * python-setuptools
-* yaml
+* libyaml-dev
+* net-tools (netstat)
+* firefox
+* graphviz
+* snort
+
+
+Install requirements with `apt-get install --force-yes -y -q python python-setuptools libyaml-dev libpq-dev python-dev libpcap-dev git net-tools openjdk-7-jre firefox xvfb graphviz snort`
 
 Build
 =====
