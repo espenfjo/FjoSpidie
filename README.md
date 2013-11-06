@@ -18,9 +18,17 @@ Requirements
 ============
 * xfvb
 * python
-* postgresql
+* libpq-dev
+* java
 * python-setuptools
-* yaml
+* libyaml-dev
+* net-tools (netstat)
+* firefox
+* graphviz
+* snort
+
+
+Install requirements with `apt-get install --force-yes -y -q python python-setuptools libyaml-dev libpq-dev python-dev libpcap-dev git net-tools openjdk-7-jre firefox xvfb graphviz snort`
 
 Build
 =====
