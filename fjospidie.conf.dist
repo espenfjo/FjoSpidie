@@ -1,6 +1,7 @@
-databaseHost=<server>
-databasePort=5432
-databaseUser=fjospidie
+database_host=<server>
+database_port=5432
+database_user=fjospidie
+database_password=pw
 database=fjospidie
-databasePassword=pw
+suricata=False
 snort_config=/etc/snort/snort.conf

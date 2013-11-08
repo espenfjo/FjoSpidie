@@ -14,9 +14,9 @@ class Report:
         else:
             self.uuid = config.uuid
 
-        self.db = psycopg2.connect(host=config.databaseHost,
-                                   user=config.databaseUser,
-                                   password=config.databasePassword,
+        self.db = psycopg2.connect(host=config.database_host,
+                                   user=config.database_user,
+                                   password=config.database_password,
                                    database=config.database)
         self.cur = self.db.cursor()
         self.db.autocommit = False

@@ -9,7 +9,7 @@ from Report import Report
 from Node import Node
 from Graph import Graph
 from engine.PcapEngine import PcapEngine
-from engine.SnortEngine import SnortEngine
+import tempfile
 #import engine
 import WebRunner
 import psycopg2
@@ -19,33 +19,47 @@ nodes = []
 
 def initialise():
     global nodes
-    config = initialise_configuration()
+
+    logging.info("Starting FjoSpidie 2.0")
+    starttime  = datetime.now()
+    ids_engine = None
+    config     = initialise_configuration()
+    tempdir    = tempfile.mkdtemp(dir="/mnt/fjospidie")
+
+    if config.suricata:
+        from engine.SuricataEngine import SuricataEngine
+    else:
+        from engine.SnortEngine import SnortEngine
+
+    report     = Report(starttime, config)
     proxy_port = random.randint(20000, 65534)
-    date = datetime.now()
-    report = Report(date, config)
-    start_url = urlparse(config.url)
+    start_url  = urlparse(config.url)
     nodes.append(Node(start_url.hostname))
     nodes[0].set_status(200)
-    pcap_engine = PcapEngine(report)
+
+    pcap_engine = PcapEngine(report, tempdir)
     pcap_engine.start()
     har = WebRunner.run_webdriver(start_url, proxy_port, config)
     pcap_engine.stop()
     pcap_path = pcap_engine.pcap_path
-    
+
     connections = WebRunner.find_external_connections(har)
-    entries = har.entries
+    entries     = har.entries
     report.insert_entries(entries)
 
-    snort_engine = SnortEngine(report, connections, config.snort_config, pcap_path)
-    snort_engine.start()
-    
+    if config.suricata:
+        ids_engine   = SuricataEngine(config, report, connections, tempdir + "/suricata", pcap_path, "/mnt/fjospidie/socket")
+    else:
+        snort_engine = SnortEngine(report, connections, config.snort_config, pcap_path)
+
+    ids_engine.start()
     graph = Graph(entries, nodes, report)
     graph.create_graph()
-
-    snort_engine.join()
+    ids_engine.join()
 
     report.insertp("UPDATE report set endtime=%s where id=%s", (datetime.now(), report.rid))
     report.db.commit()
+    logging.info("Stopping FjoSpidie")
 
 def initialise_configuration():
     """ Initialise configuration file and parse input arguments"""

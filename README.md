@@ -32,7 +32,8 @@ Install requirements with `apt-get install --force-yes -y -q python python-setup
 
 Build
 =====
-python ez_setup.py install
+`python ez_setup.py install`
+Or! If you want to run this in Docker. `docker build .`
 
 
 Configuration
@@ -44,6 +45,11 @@ Usage
 Run `python fjospidie --url http://www.google.com` to analyse google.com.
 or run `xvfb-run -a python fjospidie --url http://www.google.com` to run the spider in a xvfb server isntead
 of the default X11 server.
+
+To run with suricata you need access to suricatas socket.
+If run through docker you can eg. run:
+`docker run -v /mnt/fjospidie:/mnt/fjospidie -i -t espenfjo/fjospidie:last bash -c "cd /opt/fjospidie; xvfb-run -a python fjospidie --url http://google.no/"`
+This will mount `/mnt/fjospidie` from the host inside your container. `/mnt/fjospidie` needs to contain your Suricata socket.
 
 Web Interface
 =============

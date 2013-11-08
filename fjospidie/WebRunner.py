@@ -7,8 +7,8 @@ from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.firefox.webdriver import WebDriver
 from harpy.har import Har
 
-referer = 'http://www.google.com/search?q=hei+&oq=SUP&sourceid=firefox&ie=UTF-8'
-useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2b5) Gecko/20091204 Firefox/3.6b5 Java/1.7.0_11'
+referer   = 'http://www.google.com/search?q=hei+&oq=SUP&sourceid=firefox&ie=UTF-8'
+useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:24.0) Gecko/20100101 Firefox/24.0'
 URLs = []
 
 def run_webdriver(start_url, port, config):
@@ -29,7 +29,6 @@ def run_webdriver(start_url, port, config):
     server = Server("lib/browsermob/bin/browsermob-proxy", {'port': port})
     server.start()
     proxy = server.create_proxy()
-#    proxy = Client("localhost:8080")
     proxy.headers({'User-Agent': useragent, 'Accept-Encoding': ""})
 
     request_js=(
