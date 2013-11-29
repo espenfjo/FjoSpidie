@@ -79,9 +79,9 @@ class Report:
     def add_alerts(self, alerts):
         data = StringIO.StringIO()
         for alert in alerts:
-            data.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(
-                self.rid, alert.alarm_text, alert.classification,alert.priority,alert.dst,alert.src))
+            data.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                self.rid, alert.alarm_text, alert.classification,alert.priority,alert.dst,alert.src, alert.time))
 
         data.seek(0)
         self.cur.copy_expert(
-            "COPY alert (report_id, alarm_text, classification, priority, to_ip, from_ip) FROM STDIN", data)
+            "COPY alert (report_id, alarm_text, classification, priority, to_ip, from_ip, time) FROM STDIN", data)

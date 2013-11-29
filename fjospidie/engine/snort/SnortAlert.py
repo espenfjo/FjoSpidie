@@ -10,4 +10,3 @@ class SnortAlert:
         self.time = space_parts[0]
         self.dst = (((text_parts[2].split("} "))[1]).split("->"))[0]
         self.src = (((text_parts[2].split("} "))[1]).split("-> "))[1].strip()
-        

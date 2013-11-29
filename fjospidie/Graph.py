@@ -24,11 +24,11 @@ class Graph:
         Nodes and ParentNodes.
         If the response header has a 301/302 (rewrite/redirect) we add the
         Location as a Node, and sets the Node from the Host header as its parent.
-        
+
         All entries have at least one Host header. Add it to the Nodes list if it
         is not there already (For example from a previous Location header).
-        
-        If we have a referer header, find its Node and set it as parent for this Node 
+
+        If we have a referer header, find its Node and set it as parent for this Node
         unless we already have this Node from a previous Location
         header. Should always have its parent in the Node list."""
         for entry in self.entries:
@@ -39,7 +39,7 @@ class Graph:
                 if header.name == "Location":
                     if status == 301 or status == 302:
                         location_url = urlparse(header.value)
-                        if not location_url.hostname: 
+                        if not location_url.hostname:
                             logging.warning("Could not parse " + header.value + " into a valid domain. Skipping.")
                             break
                         location_node = Node(location_url.hostname)

@@ -34,6 +34,12 @@ CREATE TABLE graph (
     graph bytea
 );
 
+CREATE TABLE screenshot (
+    id serial PRIMARY KEY,
+    report_id integer NOT NULL references report(id),
+    image bytea
+);
+
 
 CREATE TABLE header (
     id serial PRIMARY KEY,
@@ -92,6 +98,8 @@ GRANT ALL ON TABLE entry TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE entry_id_seq TO fjospidie;
 GRANT ALL ON TABLE graph TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE graph_id_seq TO fjospidie;
+GRANT ALL ON TABLE screenshot TO fjospidie;
+GRANT SELECT,USAGE ON SEQUENCE screenshot_id_seq TO fjospidie;
 GRANT ALL ON TABLE header TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE header_id_seq TO fjospidie;
 GRANT ALL ON TABLE pcap TO fjospidie;

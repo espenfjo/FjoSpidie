@@ -42,13 +42,13 @@ Configure `fjospidie.conf` from the `fjospidie.conf.dist` file.
 
 Usage
 =====
-Run `python fjospidie --url http://www.google.com` to analyse google.com.
-or run `xvfb-run -a python fjospidie --url http://www.google.com` to run the spider in a xvfb server isntead
+Run `python fjospidie.py --url http://www.google.com` to analyse google.com.
+or run `xvfb-run -a python fjospidie.py --url http://www.google.com` to run the spider in a xvfb server isntead
 of the default X11 server.
 
 To run with suricata you need access to suricatas socket.
 If run through docker you can eg. run:
-`docker run -v /mnt/fjospidie:/mnt/fjospidie -i -t espenfjo/fjospidie:last bash -c "cd /opt/fjospidie; xvfb-run -a python fjospidie --url http://google.no/"`
+`docker run -v /mnt/fjospidie:/mnt/fjospidie -i -t espenfjo/fjospidie:last bash -c "cd /opt/fjospidie; xvfb-run -a python fjospidie.py --url http://google.no/"`
 This will mount `/mnt/fjospidie` from the host inside your container. `/mnt/fjospidie` needs to contain your Suricata socket.
 
 Web Interface

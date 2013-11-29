@@ -9,32 +9,32 @@ from snort.SnortAlert import SnortAlert
 
 class SuricataEngine(threading.Thread):
     def __init__(self, config, report, connections, suricata_dir, pcap_path, socket):
-        threading.Thread.__init__(self)                
+        threading.Thread.__init__(self)
         self.socket = socket
         self.connections = connections
         self.report = report
-        self.suricata_dir = suricata_dir
+        self.suricata_dir = suricata_dir + "/suricata"
         self.pcap_path = pcap_path
         self.alerts = []
         self.config = config
-        
+
     def run(self):
         logging.info("Starting SuricataEngine")
         os.makedirs(self.suricata_dir)
         debug = False
         if self.config.debug:
             debug = True
-            
+
         sc = SuricataSC(self.socket, verbose=debug)
         try:
-            sc.connect()            
+            sc.connect()
         except SuricataNetException, err:
             logging.error("Unable to connect to socket %s: %s" % (self.socket, err))
             return
         except SuricataReturnException, err:
             logging.error( "Unable to negotiate version with server: %s" % (err))
-            return            
-        
+            return
+
         arguments = {}
         arguments["filename"]   = self.pcap_path
         arguments["output-dir"] = self.suricata_dir
@@ -52,11 +52,11 @@ class SuricataEngine(threading.Thread):
              for line in f:
                  alert = SnortAlert(line)
                  self.alerts.append(alert)
-        
+
         self.report.add_alerts( self.alerts)
         logging.info("Stopping SnortEngine")
 
-        
+
     def check_ok(self, sc, count):
         cmdret = sc.send_command("pcap-current")
         if cmdret["return"] == "NOK":
@@ -71,4 +71,3 @@ class SuricataEngine(threading.Thread):
                     self.check_ok(sc, count)
                 else:
                     logging.error("No result from suricata...")
-                    
