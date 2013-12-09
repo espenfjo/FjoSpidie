@@ -35,7 +35,7 @@ class WebRunner:
         server = Server("lib/browsermob/bin/browsermob-proxy", {'port': port})
         server.start()
         proxy = server.create_proxy()
-        proxy.headers({'User-Agent': useragent, 'Accept-Encoding': ""})
+        proxy.headers({'User-Agent': useragent, 'Accept-Encoding': "", 'Connection':'Close'})
 
         request_js=(
             'var referer = request.getProxyRequest().getField("Referer");'

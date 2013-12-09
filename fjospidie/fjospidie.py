@@ -63,6 +63,8 @@ class FjoSpidie:
         graph = Graph(entries, nodes, report)
         graph.create_graph()
         ids_engine.join()
+        if self.config.suricata:
+            report.correlate_requests_and_alerts()
 
         report.insertp("UPDATE report set endtime=%s where id=%s", (datetime.now(), report.rid))
         report.db.commit()

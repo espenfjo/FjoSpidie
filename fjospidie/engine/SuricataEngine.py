@@ -48,10 +48,13 @@ class SuricataEngine(threading.Thread):
         self.check_ok(sc, 0)
 
         alert_file = self.suricata_dir + "/fast.log"
+        http_file = self.suricata_dir + "/http.log"
         with open(alert_file) as f:
-             for line in f:
-                 alert = SnortAlert(line)
-                 self.alerts.append(alert)
+            with open(http_file) as h:
+                for line in f:
+                    alert = SnortAlert(line, h, self.config)
+                    self.alerts.append(alert)
+                    h.seek(0)
 
         self.report.add_alerts( self.alerts)
         logging.info("Stopping SnortEngine")

@@ -5,3 +5,4 @@ database_password=pw
 database=fjospidie
 suricata=False
 snort_config=/etc/snort/snort.conf
+mynet=172.16.0.0/12

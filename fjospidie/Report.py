@@ -79,9 +79,27 @@ class Report:
     def add_alerts(self, alerts):
         data = StringIO.StringIO()
         for alert in alerts:
-            data.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
-                self.rid, alert.alarm_text, alert.classification,alert.priority,alert.dst,alert.src, alert.time))
+            data.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                self.rid, alert.alarm_text, alert.classification,alert.priority,alert.dst,alert.src, alert.time, alert.http_method, alert.http_request))
 
         data.seek(0)
         self.cur.copy_expert(
-            "COPY alert (report_id, alarm_text, classification, priority, to_ip, from_ip, time) FROM STDIN", data)
+            "COPY alert (report_id, alarm_text, classification, priority, to_ip, from_ip, time, http_method, http_request) FROM STDIN", data)
+
+
+    def correlate_requests_and_alerts(self):
+        self.cur.execute("SELECT id,http_method,http_request from alert WHERE report_id = %s", [self.rid] )
+        alerts = self.cur.fetchall()
+
+        for alert in alerts:
+            logging.debug("SELECT r.id FROM request r LEFT JOIN entry e ON r.entry_id = e.ID WHERE e.report_id = '{}' AND r.method = '{}' AND r.uri LIKE '{}'".format(self.rid, alert[1], alert[2]))
+            self.cur.execute("SELECT r.id FROM request r LEFT JOIN entry e ON r.entry_id = e.ID WHERE e.report_id = %s AND r.method = %s AND r.uri LIKE %s", [self.rid, alert[1], alert[2]])
+            records = self.cur.fetchall()
+            if len(records) > 1:
+                logging.error("WTF? Many stuffs for {}".format(alert[2]))
+            print "Records: {}".format(len(records))
+
+            if records and records[0]:
+                rid = records[0][0]
+                logging.debug("UPDATE alert SET request={} WHERE id={}".format(rid,alert[0]))
+                self.cur.execute("UPDATE alert SET request=%s WHERE id=%s", [rid,alert[0]])
