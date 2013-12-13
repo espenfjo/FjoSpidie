@@ -84,8 +84,13 @@ class WebRunner:
     def analyse_page(self, webdriver, start_url):
         global URLs
         current_page = webdriver.get(start_url.geturl())
-        screenshot = webdriver.get_screenshot_as_png()
-        self.add_scr_to_db(screenshot)
+
+        try:
+            screenshot = webdriver.get_screenshot_as_png()
+            self.add_scr_to_db(screenshot)
+        except Exception, e:
+            print "Whoops, cant take screenshot: {}".format(e)
+
         URLs.append(current_page)
 
     def add_scr_to_db(self, screenshot):

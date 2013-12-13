@@ -6,7 +6,10 @@ CREATE TABLE alert (
     priority integer,
     protocol character varying(10) DEFAULT NULL::character varying,
     from_ip text,
-    to_ip text
+    to_ip text,
+    request integer REFERENCES request(id),
+    http_method text,
+    http_request text
 );
 
 CREATE TABLE download (
