@@ -43,28 +43,35 @@ class FjoSpidie:
         nodes.append(Node(start_url.hostname))
         nodes[0].set_status(200)
 
-        pcap_engine = PcapEngine(report, tempdir)
-        pcap_engine.start()
+        if not self.config.nopcap:
+            pcap_engine = PcapEngine(report, tempdir)
+            pcap_engine.start()
+
         webrunner = WebRunner(report)
         har = webrunner.run_webdriver(start_url, proxy_port, self.config, tempdir)
-        pcap_engine.stop()
-        pcap_path = pcap_engine.pcap_path
+
+        if not self.config.nopcap:
+            pcap_engine.stop()
+            pcap_path = pcap_engine.pcap_path
 
         connections = webrunner.find_external_connections(har)
         entries     = har.entries
         report.insert_entries(entries)
 
-        if self.config.suricata:
-            ids_engine   = SuricataEngine(self.config, report, connections, tempdir, pcap_path, "/mnt/fjospidie/socket")
-        else:
-            ids_engine   = SnortEngine(report, connections, self.config.snort_config, pcap_path)
+        if not self.config.nopcap:
+            if self.config.suricata:
+                ids_engine   = SuricataEngine(self.config, report, connections, tempdir, pcap_path, "/mnt/fjospidie/socket")
+            else:
+                ids_engine   = SnortEngine(report, connections, self.config.snort_config, pcap_path)
 
-        ids_engine.start()
+            ids_engine.start()
+
         graph = Graph(entries, nodes, report)
         graph.create_graph()
-        ids_engine.join()
-        if self.config.suricata:
-            report.correlate_requests_and_alerts()
+        if not self.config.nopcap:
+            ids_engine.join()
+            if self.config.suricata:
+                report.correlate_requests_and_alerts()
 
         report.insertp("UPDATE report set endtime=%s where id=%s", (datetime.now(), report.rid))
         report.db.commit()

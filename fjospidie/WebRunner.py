@@ -8,8 +8,6 @@ from selenium.webdriver.firefox.webdriver import WebDriver
 from harpy.har import Har
 import psycopg2
 
-referer   = 'http://www.google.com/search?q=hei+&oq=SUP&sourceid=firefox&ie=UTF-8'
-useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:24.0) Gecko/20100101 Firefox/24.0'
 URLs = []
 
 class WebRunner:
@@ -29,8 +27,14 @@ class WebRunner:
 
         if config.referer:
             referer = config.referer
+        else:
+            referer   = 'http://www.google.com/search?q={}+&oq={}&oe=utf-8&rls=org.mozilla:en-US:official&client=firefox-a&channel=fflb&gws_rd=cr'.format(config.url, config.url)
+
         if config.useragent:
             useragent = config.useragent
+        else:
+            useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:24.0) Gecko/20100101 Firefox/24.0'
+
 
         server = Server("lib/browsermob/bin/browsermob-proxy", {'port': port})
         server.start()
@@ -48,9 +52,11 @@ class WebRunner:
             '}')
         proxy.request_interceptor(request_js)
         if config.firefoxprofile:
-            firefox_profile = FirefoxProfile(config.firefoxprofile)
+            firefox_profile = FirefoxProfile(profile_directory=config.firefoxprofile)
         else:
             firefox_profile = FirefoxProfile()
+
+        logging.debug("Using profile {}".format(firefox_profile.path))
 
         firefox_profile.set_preference("security.OCSP.enabled", 0)
         firefox_profile.set_preference("browser.download.folderList", 2)
@@ -89,7 +95,7 @@ class WebRunner:
             screenshot = webdriver.get_screenshot_as_png()
             self.add_scr_to_db(screenshot)
         except Exception, e:
-            print "Whoops, cant take screenshot: {}".format(e)
+            logging.error("Whoops, cant take screenshot: {}".format(e))
 
         URLs.append(current_page)
 
