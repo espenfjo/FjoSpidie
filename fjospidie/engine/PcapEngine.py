@@ -10,10 +10,11 @@ import uuid
 import psycopg2
 
 class PcapEngine(threading.Thread):
-    def __init__(self, report, pcap_folder):
+    def __init__(self, config, report, pcap_folder):
         threading.Thread.__init__(self)
         self.pcap_path = None
         self.report = report
+        self.config = config
         self.pcap_folder = pcap_folder
 
     def run(self):
@@ -21,11 +22,17 @@ class PcapEngine(threading.Thread):
         self.p = pcap.pcapObject()
         snaplen = 64 * 1024
         timeout = 1
+        if 'bpf' in self.config:
+            bpf = "{} and not (host {} and port {})".format(self.config.bpf, self.config.database_host,self.config.database_port)
+        else:
+            bpf = "not (host {} and port {})".format(self.config.database_host,self.config.database_port)
+
         pcap_file = tempfile.NamedTemporaryFile(prefix="snort", suffix="pcap", delete=False, dir=self.pcap_folder)
         self.pcap_path = pcap_file.name
         logging.debug("PCAPing to " + self.pcap_path)
         dev = self.find_default_adapter()
         self.p.open_live(dev, snaplen, 0, timeout)
+        self.p.setfilter(bpf, 0, 0)
         dumper = self.p.dump_open(self.pcap_path)
 
         self.p.loop(-1,dumper)

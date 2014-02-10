@@ -44,7 +44,7 @@ class FjoSpidie:
         nodes[0].set_status(200)
 
         if not self.config.nopcap:
-            pcap_engine = PcapEngine(report, tempdir)
+            pcap_engine = PcapEngine(self.config, report, tempdir)
             pcap_engine.start()
 
         webrunner = WebRunner(report)
