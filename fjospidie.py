@@ -24,6 +24,7 @@ def read_config():
                         help='The Firefox profile used to run Firefox')
     parser.add_argument('--snortconfig', type=str, nargs=1,
                         help='Snort configuration file')
+    parser.add_argument('--nopcap', help='Doesnt fire up the pcap engine, and hence, doesnt fire up snort/suricata engines', action="store_true")
     parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
     parser.add_argument("-d", "--debug", help="Debug output",
