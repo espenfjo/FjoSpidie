@@ -49,19 +49,22 @@ class Report:
 
             url = urlparse(harRequest.url)
             if url:
-                requests.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                requests.write(u"{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
                     entryid, harRequest.body_size, harRequest.headers_size, harRequest.method, harRequest.url, harRequest.http_version, url.hostname))
                 responses.write(
                     "{}\t{}\t{}\t{}\t{}\t{}\n".format(entryid, harResponse.http_version,
                                                       harResponse.status_text, harResponse.status, harResponse.body_size, harResponse.headers_size))
 
                 for header in harResponse.headers:
-                    headers.write("{}\t{}\t{}\t{}\n".format(
+                    headers.write(u"{}\t{}\t{}\t{}\n".format(
                         entryid, header.name, header.value, "response"))
 
                 for header in harRequest.headers:
-                    headers.write("{}\t{}\t{}\t{}\n".format(
-                        entryid, header.name, header.value, "request"))
+                    headers.write(u"{}\t{}\t{}\t{}\n".format(
+                        entryid,
+                        header.name,
+                        header.value, "request")
+                    )
 
         headers.seek(0)
         responses.seek(0)
@@ -79,7 +82,7 @@ class Report:
     def add_alerts(self, alerts):
         data = StringIO.StringIO()
         for alert in alerts:
-            data.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+            data.write(u"{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
                 self.rid, alert.alarm_text, alert.classification,alert.priority,alert.dst,alert.src, alert.time, alert.http_method, alert.http_request))
 
         data.seek(0)
