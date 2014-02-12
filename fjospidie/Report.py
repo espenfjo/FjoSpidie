@@ -56,15 +56,10 @@ class Report:
                                                       harResponse.status_text, harResponse.status, harResponse.body_size, harResponse.headers_size))
 
                 for header in harResponse.headers:
-                    headers.write(u"{}\t{}\t{}\t{}\n".format(
-                        entryid, header.name, header.value, "response"))
+                    headers.write(u"{}\t{}\t{}\t{}\n".format(entryid, header.name, header.value, "response"))
 
                 for header in harRequest.headers:
-                    headers.write(u"{}\t{}\t{}\t{}\n".format(
-                        entryid,
-                        header.name,
-                        header.value, "request")
-                    )
+                    headers.write(u"{}\t{}\t{}\t{}\n".format(entryid, header.name, header.value, "request"))
 
         headers.seek(0)
         responses.seek(0)
