@@ -36,8 +36,14 @@ or optionally specify your own port:
     [~]$ curl -X POST -d 'port=9099' http://localhost:9090/proxy
     {"port":9099}
 
-Once that is done, a new proxy will be available on the port returned. All you have to do is point a browser to that proxy on that port and you should be able to browser the internet. The following additional APIs will then be available:
+or if running BrowserMob Proxy in a multi-homed environment, specify a desired bind address (default is `0.0.0.0`):
 
+    [~]$ curl -X POST -d 'bindAddress=192.168.1.222' http://localhost:9090/proxy
+    {"port":9096}
+
+Once that is done, a new proxy will be available on the port returned. All you have to do is point a browser to that proxy on that port and you should be able to browse the internet. The following additional APIs will then be available:
+
+ - GET /proxy - get a list of ports attached to `ProxyServer` instances managed by `ProxyManager`
  - PUT /proxy/[port]/har - creates a new HAR attached to the proxy and returns the HAR content if there was a previous HAR. Supports the following parameters:
   - initialPageRef - the string name of the first page ref that should be used in the HAR. Defaults to "Page 1".
   - captureHeaders - Boolean, capture headers
@@ -45,15 +51,16 @@ Once that is done, a new proxy will be available on the port returned. All you h
   - captureBinaryContent - Boolean, capture binary content
  - PUT /proxy/[port]/har/pageRef - starts a new page on the existing HAR. Supports the following parameters:
   - pageRef - the string name of the first page ref that should be used in the HAR. Defaults to "Page N" where N is the next page number.
- - PUT /proxy/[port]/har/pageRef - creates a new HAR attached to the proxy and returns the HAR content if there was a previous HAR
  - DELETE /proxy/[port] - shuts down the proxy and closes the port
  - GET /proxy/[port]/har - returns the JSON/HAR content representing all the HTTP traffic passed through the proxy
  - PUT /proxy/[port]/whitelist - Sets a list of URL patterns to whitelist. Takes the following parameters:
   - regex - a comma separated list of regular expressions
   - status - the HTTP status code to return for URLs that do not match the whitelist
+ - DELETE /proxy/[port]/whitelist - Clears all URL patterns from the whitelist 
  - PUT /proxy/[port]/blacklist - Set a URL to blacklist. Takes the following parameters:
   - regex - the blacklist regular expression
   - status - the HTTP status code to return for URLs that are blacklisted
+ - DELETE /proxy/[port]/blacklist - Clears all URL patterns from the blacklist
  - PUT /proxy/[port]/limit - Limit the bandwidth through the proxy. Takes the following parameters:
   - downstreamKbps - Sets the downstream kbps
   - upstreamKbps - Sets the upstream kbps
@@ -71,13 +78,14 @@ Once that is done, a new proxy will be available on the port returned. All you h
   - quietPeriodInMs - Sets quiet period in milliseconds
   - timeoutInMs - Sets timeout in milliseconds 
  - PUT /proxy/[port]/timeout - Handles different proxy timeouts. Takes the following parameters:
-  - requestTimeout - request timeout in milliseconds
-  - readTimeout - read timeout in milliseconds. Which is the timeout for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets). A timeout value of zero is interpreted as an infinite timeout.
-  - connectionTimeout - Determines the timeout in milliseconds until a connection is established. A timeout value of zero is interpreted as an infinite timeout. 
-  - dnsCacheTimeout - Sets the maximum length of time that records will be stored in this Cache. A negative value disables this feature (that is, sets no limit).
+  - requestTimeout - request timeout in milliseconds. A timeout value of -1 is interpreted as infinite timeout. It equals -1 by default.
+  - readTimeout - read timeout in milliseconds. Which is the timeout for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets). A timeout value of zero is interpreted as an infinite timeout. It equals 60000 by default
+  - connectionTimeout - Determines the timeout in milliseconds until a connection is established. A timeout value of zero is interpreted as an infinite timeout. It eqauls 60000 by default
+  - dnsCacheTimeout - Sets the maximum length of time that records will be stored in this Cache. A nonpositive value disables this feature (that is, sets no limit). It equals 0 y default
  - PUT /proxy/[port]/rewrite - Redirecting URL's
   - matchRegex - a matching URL regular expression
   - replace - replacement URL
+ - DELETE /proxy/[port]/rewrite - Removes all URL redirection rules currently in effect
  - PUT /proxy/[port]/retry - Setting the retry count
   - retrycount - the number of times a method will be retried
  - DELETE /proxy/[port]/dns/cache - Empties the Cache.
@@ -113,7 +121,7 @@ If you're using Java and Selenium, the easiest way to get started is to embed th
     <dependency>
         <groupId>net.lightbody.bmp</groupId>
         <artifactId>browsermob-proxy</artifactId>
-        <version>LATEST_VERSION (ex: 2.0-beta-8)</version>
+        <version>LATEST_VERSION (ex: 2.0-beta-9)</version>
         <scope>test</scope>
     </dependency>
 
@@ -129,7 +137,7 @@ If your project already defines a Selenium dependency then you may want to exclu
     <dependency>
         <groupId>net.lightbody.bmp</groupId>
         <artifactId>browsermob-proxy</artifactId>
-        <version>LATEST_VERSION (ex: 2.0-beta-8)</version>
+        <version>LATEST_VERSION (ex: 2.0-beta-9)</version>
         <scope>test</scope>
         <exclusions>
             <exclusion>
@@ -172,26 +180,26 @@ You can use the REST API with Selenium however you want. But if you're writing y
 HTTP Request Manipulation
 -------------------
 
-While not yet available via the REST interface, you can manipulate the requests like so:
+You can manipulate the requests like so:
 
     server.addRequestInterceptor(new RequestInterceptor() {
         @Override
-        public void process(BrowserMobHttpRequest request) {
+        public void process(BrowserMobHttpRequest request, Har har) {
             request.getMethod().removeHeaders("User-Agent");
             request.getMethod().addHeader("User-Agent", "Bananabot/1.0");
         }
     });
 
-We will soon be adding support for this advanced capability in the REST interface as well, using JavaScript snippets that can be posted as the interceptor code.
+You can also POST a JavaScript payload to `/:port/interceptor/request` and `/:port/interceptor/response` using the REST interface. The functions will have a `request`/`response` variable, respectively, and a `har` variable (which may be null if a HAR isn't set up yet). The JavaScript code will be run by [Rhino](https://github.com/mozilla/rhino) and have access to the same Java API in the example above. Consult the Java API docs for more info.
 
 SSL Support
 -----------
 
 While the proxy supports SSL, it requires that a Certificate Authority be installed in to the browser. This allows the browser to trust all the SSL traffic coming from the proxy, which will be proxied using a classic man-in-the-middle technique. IT IS CRITICAL THAT YOU NOT INSTALL THIS CERTIFICATE AUTHORITY ON A BROWSER THAT IS USED FOR ANYTHING OTHER THAN TESTING.
 
-If you're doing testing with Selenium, you'll want to make sure that the browser profile that gets set up by Selenium not only has the proxy configured, but also has the CA installed. Unfortuantely, there is no API for doing this in Selenium, so you'll have to solve it uniquely for each browser type. We hope to make this easier in upcoming releases.
+If you're doing testing with Selenium, you'll want to make sure that the browser profile that gets set up by Selenium not only has the proxy configured, but also has the CA installed (Firefox set up by Selenium has installed CA by default). Unfortuantely, there is no API for doing this in Selenium, so you'll have to solve it uniquely for each browser type. We hope to make this easier in upcoming releases.
 
 NodeJS Support
 --------------
 
-NodeJS bindings for browswermob-proxy are available [here](https://github.com/zzo/browsermob-node).  Built-in support for [Selenium][http://seleniumhq.com] or use [CapserJS-on-PhantomJS](http://casperjs.org) or anything else to drive traffic for HAR generation.
+NodeJS bindings for browswermob-proxy are available [here](https://github.com/zzo/browsermob-node).  Built-in support for [Selenium](http://seleniumhq.org) or use [CapserJS-on-PhantomJS](http://casperjs.org) or anything else to drive traffic for HAR generation.
