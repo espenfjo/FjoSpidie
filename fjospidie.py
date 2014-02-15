@@ -18,7 +18,7 @@ def read_config():
                         help='Unique UUID of this report')
     parser.add_argument('--referer', type=str, nargs='?',
                         help='The HTTP_REFERER to use when loading the URL')
-    parser.add_argument('--useragent', type=str, nargs=1,
+    parser.add_argument('--useragent', type=str, nargs='?',
                         help='The useragent used')
     parser.add_argument('--firefoxprofile', type=str, nargs=1,
                         help='The Firefox profile used to run Firefox')
