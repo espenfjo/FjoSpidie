@@ -113,6 +113,7 @@ CREATE TABLE response_content (
     path text,
     md5 text,
     data text,
+    mimetype text,
     size integer
 );
 ALTER TABLE response_content ADD CONSTRAINT response_content_response_id_fkey FOREIGN KEY(response_id) REFERENCES response(id) DEFERRABLE;
