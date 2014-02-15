@@ -94,6 +94,19 @@ CREATE TABLE response (
     headersize integer
 );
 
+CREATE TABLE cookie (
+    id serial PRIMARY KEY,
+    response_id integer REFERENCES response(id),
+    name text,
+    value bytea,
+    path text,
+    domain text,
+    expires text,
+    httpOnly text,
+    secure text,
+    comment text
+ );
+
 GRANT ALL ON TABLE alert TO fjospidie;
 GRANT ALL ON SEQUENCE alert_id_seq TO fjospidie;
 GRANT ALL ON TABLE download TO fjospidie;
@@ -113,3 +126,6 @@ GRANT ALL ON TABLE request TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE request_id_seq TO fjospidie;
 GRANT ALL ON TABLE response TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE response_id_seq TO fjospidie;
+
+GRANT ALL ON TABLE cookie TO fjospidie;
+GRANT SELECT,USAGE ON SEQUENCE cookie_id_seq TO fjospidie;

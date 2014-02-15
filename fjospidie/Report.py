@@ -38,7 +38,10 @@ class Report:
         headers = StringIO.StringIO()
         responses = StringIO.StringIO()
         requests = StringIO.StringIO()
-        for entry in entries:
+        cookies = StringIO.StringIO()
+        response_ids = self.get_response_ids(len(entries))
+
+        for idx, entry in enumerate(entries):
             entryid = self.insert(
                 "INSERT INTO entry (report_id) values({}) RETURNING id".format(self.rid))
             if entryid <= 0:
@@ -46,13 +49,17 @@ class Report:
 
             harRequest = entry.request
             harResponse = entry.response
-
             url = urlparse(harRequest.url)
             if url:
+                print harResponse.cookies
+                for cookie in harResponse.cookies:
+                    cookies.write(u"{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                        response_ids[idx-1][0], cookie.name, cookie.value, cookie.path, cookie.domain, cookie.expires, cookie.httpOnly, cookie.secure, cookie.comment))
+
                 requests.write(u"{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
                     entryid, harRequest.body_size, harRequest.headers_size, harRequest.method, harRequest.url, harRequest.http_version, url.hostname))
                 responses.write(
-                    "{}\t{}\t{}\t{}\t{}\t{}\n".format(entryid, harResponse.http_version,
+                    "{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(response_ids[idx-1][0], entryid, harResponse.http_version,
                                                       harResponse.status_text, harResponse.status, harResponse.body_size, harResponse.headers_size))
 
                 for header in harResponse.headers:
@@ -63,15 +70,23 @@ class Report:
 
         headers.seek(0)
         responses.seek(0)
-        requests.seek(0)
-        headers.seek(0)
+        cookies.seek(0)
+        
         self.cur.copy_expert(
             "COPY header (entry_id, name, value, type) FROM STDIN", headers)
         self.cur.copy_expert(
-            "COPY response (entry_id, httpversion, statustext, status, bodysize, headersize) FROM STDIN", responses)
+            "COPY response (id, entry_id, httpversion, statustext, status, bodysize, headersize) FROM STDIN", responses)
         self.cur.copy_expert(
             "COPY request (entry_id, bodysize, headersize, method, uri, httpversion, host) FROM STDIN", requests)
+        self.cur.copy_expert(
+            "COPY cookie (response_id, name, value, path, domain, expires, httpOnly, secure, comment) FROM STDIN", cookies)
+
         self.db.commit()
+
+
+    def get_response_ids(self,entries_num):
+        self.cur.execute("SELECT nextval('response_id_seq') FROM generate_series(1,{})".format(entries_num))
+        return self.cur.fetchall()
 
 
     def add_alerts(self, alerts):
