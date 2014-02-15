@@ -35,6 +35,9 @@ class WebRunner:
         else:
             useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:24.0) Gecko/20100101 Firefox/24.0'
 
+        logging.debug("Running with UserAgent: {}".format(useragent))
+        logging.debug("Running with Referer: {}".format(referer))
+        logging.debug("Checking URL: {}".format(config.url))
 
         server = Server("lib/browsermob/bin/browsermob-proxy", {'port': port})
         server.start()
