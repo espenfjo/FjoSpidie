@@ -4,7 +4,7 @@ from urlparse import urlparse
 import psycopg2
 import psycopg2.extras
 import StringIO
-
+import hashlib
 
 class Report:
 
@@ -40,7 +40,7 @@ class Report:
         requests = StringIO.StringIO()
         cookies = StringIO.StringIO()
         response_ids = self.get_response_ids(len(entries))
-
+        self.cur.execute("SET CONSTRAINTS response_content_response_id_fkey DEFERRED");
         for idx, entry in enumerate(entries):
             entryid = self.insert(
                 "INSERT INTO entry (report_id) values({}) RETURNING id".format(self.rid))
@@ -49,9 +49,9 @@ class Report:
 
             harRequest = entry.request
             harResponse = entry.response
+            harContent = harResponse.content
             url = urlparse(harRequest.url)
             if url:
-                print harResponse.cookies
                 for cookie in harResponse.cookies:
                     cookies.write(u"{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
                         response_ids[idx-1][0], cookie.name, cookie.value, cookie.path, cookie.domain, cookie.expires, cookie.httpOnly, cookie.secure, cookie.comment))
@@ -62,6 +62,10 @@ class Report:
                     "{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(response_ids[idx-1][0], entryid, harResponse.http_version,
                                                       harResponse.status_text, harResponse.status, harResponse.body_size, harResponse.headers_size))
 
+
+                if harContent:
+                    self.content_info(harContent.text, response_ids[idx-1][0], url.path)
+
                 for header in harResponse.headers:
                     headers.write(u"{}\t{}\t{}\t{}\n".format(entryid, header.name, header.value, "response"))
 
@@ -70,8 +74,9 @@ class Report:
 
         headers.seek(0)
         responses.seek(0)
+        requests.seek(0)
         cookies.seek(0)
-        
+
         self.cur.copy_expert(
             "COPY header (entry_id, name, value, type) FROM STDIN", headers)
         self.cur.copy_expert(
@@ -82,6 +87,11 @@ class Report:
             "COPY cookie (response_id, name, value, path, domain, expires, httpOnly, secure, comment) FROM STDIN", cookies)
 
         self.db.commit()
+
+    def content_info(self, harContent, response_id, path):
+        size = len(harContent)
+        md5 = hashlib.md5(harContent.encode('utf-8')).hexdigest()
+        self.cur.execute("INSERT INTO response_content (response_id, data, md5, size, path) VALUES (%s, %s, %s, %s, %s)", (response_id, harContent, md5, size, path))
 
 
     def get_response_ids(self,entries_num):

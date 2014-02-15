@@ -73,8 +73,8 @@ class WebRunner:
         firefox_profile.set_preference("network.proxy.type", 1)
         firefox_profile.set_proxy(proxy.selenium_proxy())
         try:
-            webdriver = WebDriver(firefox_profile)
-            proxy.new_har(start_url.hostname, options={"captureHeaders":"true"})
+            webdriver = WebDriver(firefox_profile)                               
+            proxy.new_har(start_url.hostname, options={"captureHeaders":"true", "captureContent":"true", "captureBinaryContent":"true"})
             self.analyse_page(webdriver, start_url)
             har = proxy.har
             logging.info("Stopping WebRunner")

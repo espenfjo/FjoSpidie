@@ -91,7 +91,7 @@ CREATE TABLE response (
     statustext text,
     status integer,
     bodysize integer,
-    headersize integer
+    headersize integer,
 );
 
 CREATE TABLE cookie (
@@ -106,6 +106,16 @@ CREATE TABLE cookie (
     secure text,
     comment text
  );
+
+CREATE TABLE response_content (
+    id serial PRIMARY KEY,
+    response_id integer,
+    path text,
+    md5 text,
+    data text,
+    size integer
+);
+ALTER TABLE response_content ADD CONSTRAINT response_content_response_id_fkey FOREIGN KEY(response_id) REFERENCES response(id) DEFERRABLE;
 
 GRANT ALL ON TABLE alert TO fjospidie;
 GRANT ALL ON SEQUENCE alert_id_seq TO fjospidie;
@@ -126,6 +136,7 @@ GRANT ALL ON TABLE request TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE request_id_seq TO fjospidie;
 GRANT ALL ON TABLE response TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE response_id_seq TO fjospidie;
-
 GRANT ALL ON TABLE cookie TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE cookie_id_seq TO fjospidie;
+GRANT ALL ON TABLE response_content TO fjospidie;
+GRANT SELECT,USAGE ON SEQUENCE response_content_id_seq TO fjospidie;
