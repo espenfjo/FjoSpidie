@@ -13,8 +13,10 @@ import tempfile
 from WebRunner import WebRunner
 import psycopg2
 import logging
-nodes = []
+import importlib
 
+nodes = []
+parsers = []
 class FjoSpidie:
     def __init__(self, config):
         self.config = config
@@ -57,6 +59,18 @@ class FjoSpidie:
         connections = webrunner.find_external_connections(har)
         entries     = har.entries
         report.insert_entries(entries)
+        if self.config.parsers:
+            for parser in self.config.parsers,:
+                package = "fjospidie.engine.parser.{}".format(parser)
+                try:
+                    imported = importlib.import_module(package)
+                    parser_class = getattr(imported, parser)
+                    parser_engine = parser_class(self.config, report, entries)
+                    parsers.append(parser_engine)
+                    parser_engine.start()
+                except Exception, e:
+                    logging.error("Error starting parser {}: {}".format(parser, e))
+                    next
 
         if not self.config.nopcap:
             if self.config.suricata:
@@ -72,6 +86,9 @@ class FjoSpidie:
             ids_engine.join()
             if self.config.suricata:
                 report.correlate_requests_and_alerts()
+
+        for parse_engine in parsers:
+            parse_engine.join()
 
         report.insertp("UPDATE report set endtime=%s where id=%s", (datetime.now(), report.rid))
         report.db.commit()

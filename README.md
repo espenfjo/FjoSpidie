@@ -25,7 +25,8 @@ Requirements
 * net-tools (netstat)
 * firefox
 * graphviz
-* snort
+* snort or suricata
+* yara 2.0 (python-yara 2.0)
 
 
 Install requirements with `apt-get install --force-yes -y -q python python-setuptools libyaml-dev libpq-dev python-dev libpcap-dev git net-tools openjdk-7-jre firefox xvfb graphviz snort`

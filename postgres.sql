@@ -116,7 +116,28 @@ CREATE TABLE response_content (
     mimetype text,
     size integer
 );
+
 ALTER TABLE response_content ADD CONSTRAINT response_content_response_id_fkey FOREIGN KEY(response_id) REFERENCES response(id) DEFERRABLE;
+
+CREATE TABLE yara (
+  id serial PRIMARY KEY,
+  content_id integer REFERENCES response_content(id),
+  rule text,
+  description text
+);
+
+CREATE TABLE yara_tag(
+  id serial PRIMARY KEY,
+  yara_id integer REFERENCES yara(id),
+  tag text
+);
+
+CREATE TABLE yara_string(
+  id serial PRIMARY KEY,
+  yara_id integer REFERENCES yara(id),
+  string text
+);
+
 
 GRANT ALL ON TABLE alert TO fjospidie;
 GRANT ALL ON SEQUENCE alert_id_seq TO fjospidie;
@@ -141,3 +162,9 @@ GRANT ALL ON TABLE cookie TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE cookie_id_seq TO fjospidie;
 GRANT ALL ON TABLE response_content TO fjospidie;
 GRANT SELECT,USAGE ON SEQUENCE response_content_id_seq TO fjospidie;
+GRANT ALL ON TABLE yara TO fjospidie;
+GRANT SELECT,USAGE ON SEQUENCE yara_id_seq TO fjospidie;
+GRANT ALL ON TABLE yara_string TO fjospidie;
+GRANT SELECT,USAGE ON SEQUENCE yara_string_id_seq TO fjospidie;
+GRANT ALL ON TABLE yara_tag TO fjospidie;
+GRANT SELECT,USAGE ON SEQUENCE yara_tag_id_seq TO fjospidie;

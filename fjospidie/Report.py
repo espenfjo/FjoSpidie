@@ -64,7 +64,7 @@ class Report:
 
 
                 if harContent:
-                    self.content_info(harContent, response_ids[idx-1][0], url.path)
+                    self.content_info(harContent, idx, response_ids[idx-1][0], url.path, entries)
 
                 for header in harResponse.headers:
                     headers.write(u"{}\t{}\t{}\t{}\n".format(entryid, header.name, header.value, "response"))
@@ -88,17 +88,35 @@ class Report:
 
         self.db.commit()
 
-    def content_info(self, harContent, response_id, path):
+    def content_info(self, harContent, idx, response_id, path, entries):
         content = harContent.text
         size = len(content)
         md5 = hashlib.md5(content.encode('utf-8')).hexdigest()
-        self.cur.execute("INSERT INTO response_content (response_id, data, md5, size, path, mimetype) VALUES (%s, %s, %s, %s, %s, %s)", (response_id, content, md5, size, path, harContent.mime_type))
+        self.cur.execute("INSERT INTO response_content (response_id, data, md5, size, path, mimetype) VALUES (%s, %s, %s, %s, %s, %s)  RETURNING id", (response_id, content, md5, size, path, harContent.mime_type))
+
+        contentid =  self.cur.fetchone()[0]
+        entries[idx].contentid = contentid
 
 
     def get_response_ids(self,entries_num):
         self.cur.execute("SELECT nextval('response_id_seq') FROM generate_series(1,{})".format(entries_num))
         return self.cur.fetchall()
 
+
+    def add_yara_matches(self, matches, cid):
+        description = ''
+        for match in matches:
+            rule = match.rule
+            if match.meta['description']:
+                description = match.meta['description']
+
+            self.cur.execute(
+                "INSERT INTO yara (content_id, rule, description) VALUES (%s,%s,%s) RETURNING id", (cid, rule, description))
+            yaraid = self.cur.fetchone()[0]
+            if yaraid <= 0:
+                continue
+            for tag in match.tags:
+                self.insertp("INSERT INTO yara_tag (yara_id, tag) VALUES (%s,%s)", (yaraid, tag))
 
     def add_alerts(self, alerts):
         data = StringIO.StringIO()

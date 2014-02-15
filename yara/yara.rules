@@ -1,0 +1,8 @@
+include "embedded.yar"
+include "vmdetect.yar"
+include "upx.yar"
+include "shellcodes.yar"
+include "avdetect.yar"
+include "alien-vmdetect.yar"
+include "sandboxdetect.yar"
+include "capabilities.yar"
