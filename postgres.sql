@@ -96,7 +96,7 @@ CREATE TABLE response (
 
 CREATE TABLE cookie (
     id serial PRIMARY KEY,
-    response_id integer REFERENCES response(id),
+    response_id integer,
     name text,
     value bytea,
     path text,
@@ -106,6 +106,7 @@ CREATE TABLE cookie (
     secure text,
     comment text
  );
+ALTER TABLE cookie ADD CONSTRAINT cookie_response_id_fkey FOREIGN KEY(response_id) REFERENCES response(id) DEFERRABLE;
 
 CREATE TABLE response_content (
     id serial PRIMARY KEY,

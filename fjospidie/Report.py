@@ -38,9 +38,9 @@ class Report:
         headers = StringIO.StringIO()
         responses = StringIO.StringIO()
         requests = StringIO.StringIO()
-        cookies = StringIO.StringIO()
         response_ids = self.get_response_ids(len(entries))
         self.cur.execute("SET CONSTRAINTS response_content_response_id_fkey DEFERRED");
+        self.cur.execute("SET CONSTRAINTS cookie_response_id_fkey DEFERRED");
         for idx, entry in enumerate(entries):
             entryid = self.insert(
                 "INSERT INTO entry (report_id) values({}) RETURNING id".format(self.rid))
@@ -53,8 +53,9 @@ class Report:
             url = urlparse(harRequest.url)
             if url:
                 for cookie in harResponse.cookies:
-                    cookies.write(u"{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
-                        response_ids[idx-1][0], cookie.name, cookie.value, cookie.path, cookie.domain, cookie.expires, cookie.httpOnly, cookie.secure, cookie.comment))
+                    self.cur.execute("INSERT INTO cookie (response_id, name, value, path, domain, expires, httpOnly, secure, comment) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                     ( response_ids[idx-1][0], cookie.name, cookie.value, cookie.path, cookie.domain, cookie.expires, cookie.http_only, cookie.secure, cookie.comment ))
+
 
                 requests.write(u"{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
                     entryid, harRequest.body_size, harRequest.headers_size, harRequest.method, harRequest.url, harRequest.http_version, url.hostname))
@@ -75,7 +76,6 @@ class Report:
         headers.seek(0)
         responses.seek(0)
         requests.seek(0)
-        cookies.seek(0)
 
         self.cur.copy_expert(
             "COPY header (entry_id, name, value, type) FROM STDIN", headers)
@@ -83,8 +83,6 @@ class Report:
             "COPY response (id, entry_id, httpversion, statustext, status, bodysize, headersize) FROM STDIN", responses)
         self.cur.copy_expert(
             "COPY request (entry_id, bodysize, headersize, method, uri, httpversion, host) FROM STDIN", requests)
-        self.cur.copy_expert(
-            "COPY cookie (response_id, name, value, path, domain, expires, httpOnly, secure, comment) FROM STDIN", cookies)
 
         self.db.commit()
 
