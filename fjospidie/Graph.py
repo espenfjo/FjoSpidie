@@ -4,20 +4,23 @@ from urlparse import urlparse
 from Node import Node
 from ParentNode import ParentNode
 import psycopg2
+
+
 class Graph:
-    def __init__(self, entries, nodes,report):
+
+    def __init__(self, entries, nodes, report):
         self.graph = pydot.Dot(graph_type='digraph', rankdir='LR', ratio='fill', bb="'0,0,1382,108'")
         self.entries = entries
         self.nodes = nodes
         self.report = report
+
     def create_graph(self):
         self.calculate_nodes()
         self.fill_nodes()
         self.connect_nodes()
         data = self.graph.create_png()
-        self.report.insertp("INSERT INTO graph (report_id, graph) VALUES (%s,%s)",(self.report.rid,psycopg2.Binary(data)))
-
-
+        self.report.insertp("INSERT INTO graph (report_id, graph) VALUES (%s,%s)",
+                            (self.report.rid, psycopg2.Binary(data)))
 
     def calculate_nodes(self):
         """ This function loops through all HTTP connections and maps all
@@ -43,8 +46,8 @@ class Graph:
                             logging.warning("Could not parse " + header.value + " into a valid domain. Skipping.")
                             break
                         location_node = Node(location_url.hostname)
-                        location_node.set_status(status);
-                        location_node.set_parent(node, status);
+                        location_node.set_status(status)
+                        location_node.set_parent(node, status)
                         self.add_node_if_not_exists(location_node, entry)
                     else:
                         logging.warning("Unknown STATUS id " + str(status) + " when having Location header")
@@ -61,9 +64,6 @@ class Graph:
                         if refURL.hostname == pnode.label:
                             if len(node.parents) == 0:
                                 node.set_parent(pnode, status)
-
-
-
 
     def add_node_if_not_exists(self, node, entry):
         """Adds a Node to the Node list if it is not already in the list."""
@@ -82,23 +82,21 @@ class Graph:
 
         return None
 
-
     def fill_nodes(self):
         """Loops through a list of Node objects and adds
           them to the GraphViz object as Dot Nodes."""
         for node in self.nodes:
             self.graph.add_node(pydot.Node(node.label))
 
-
     def connect_nodes(self):
         colours = {
-            200:"green",
-            204:"green",
-            404:"red",
-            403:"red",
-            301:"orange",
-            302:"yellow",
-            304:"yellow"
+            200: "green",
+            204: "green",
+            404: "red",
+            403: "red",
+            301: "orange",
+            302: "yellow",
+            304: "yellow"
         }
         for node in self.nodes:
             if len(node.parents) > 0:
@@ -108,7 +106,7 @@ class Graph:
                         colour = colours[node.status]
                     except:
                         pass
-                    edge_weight = 1 #+ (0.1 * parent.number_of_links)
+                    edge_weight = 1  # + (0.1 * parent.number_of_links)
                     edge = pydot.Edge(parent.label, node.label, color=colour)
                     self.graph.add_edge(edge)
             else:

@@ -7,7 +7,9 @@ import os
 from suricata.suricatasc import *
 from snort.SnortAlert import SnortAlert
 
+
 class SuricataEngine(threading.Thread):
+
     def __init__(self, config, report, connections, suricata_dir, pcap_path, socket):
         threading.Thread.__init__(self)
         self.socket = socket
@@ -32,11 +34,11 @@ class SuricataEngine(threading.Thread):
             logging.error("Unable to connect to socket %s: %s" % (self.socket, err))
             return
         except SuricataReturnException, err:
-            logging.error( "Unable to negotiate version with server: %s" % (err))
+            logging.error("Unable to negotiate version with server: %s" % (err))
             return
 
         arguments = {}
-        arguments["filename"]   = self.pcap_path
+        arguments["filename"] = self.pcap_path
         arguments["output-dir"] = self.suricata_dir
 
         cmdret = sc.send_command("pcap-file", arguments)
@@ -56,9 +58,8 @@ class SuricataEngine(threading.Thread):
                     self.alerts.append(alert)
                     h.seek(0)
 
-        self.report.add_alerts( self.alerts)
+        self.report.add_alerts(self.alerts)
         logging.info("Stopping SnortEngine")
-
 
     def check_ok(self, sc, count):
         cmdret = sc.send_command("pcap-current")
@@ -70,7 +71,7 @@ class SuricataEngine(threading.Thread):
             else:
                 if count < 60:
                     time.sleep(0.5)
-                    count +=1
+                    count += 1
                     self.check_ok(sc, count)
                 else:
                     logging.error("No result from suricata...")

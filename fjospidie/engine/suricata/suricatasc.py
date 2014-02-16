@@ -26,29 +26,38 @@ SURICATASC_VERSION = "0.9"
 VERSION = "0.1"
 SIZE = 4096
 
+
 class SuricataException(Exception):
+
     """
     Generic class for suricatasc exception
     """
+
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
         return str(self.value)
 
+
 class SuricataNetException(SuricataException):
+
     """
     Exception raised when network error occur.
     """
     pass
 
+
 class SuricataCommandException(SuricataException):
+
     """
     Exception raised when command is not correct.
     """
     pass
 
+
 class SuricataReturnException(SuricataException):
+
     """
     Exception raised when return message is not correct.
     """
@@ -56,6 +65,7 @@ class SuricataReturnException(SuricataException):
 
 
 class SuricataCompleter:
+
     def __init__(self, words):
         self.words = words
         self.generator = None
@@ -74,9 +84,12 @@ class SuricataCompleter:
             return None
         return None
 
+
 class SuricataSC:
+
     def __init__(self, sck_path, verbose=False):
-        self.cmd_list=['shutdown','quit','pcap-file','pcap-file-number','pcap-file-list','iface-list','iface-stat']
+        self.cmd_list = ['shutdown', 'quit', 'pcap-file',
+                         'pcap-file-number', 'pcap-file-list', 'iface-list', 'iface-stat']
         self.sck_path = sck_path
         self.verbose = verbose
 
@@ -94,7 +107,7 @@ class SuricataSC:
                 sleep(0.3)
         return cmdret
 
-    def send_command(self, command, arguments = None):
+    def send_command(self, command, arguments=None):
         if command not in self.cmd_list and command != 'command-list':
             raise SuricataCommandException("No such command: %s", command)
 
@@ -111,7 +124,7 @@ class SuricataSC:
             raise SuricataReturnException("Unable to get message from server")
 
         if self.verbose:
-            print "RCV: "+ json.dumps(cmdret)
+            print "RCV: " + json.dumps(cmdret)
 
         return cmdret
 
@@ -123,7 +136,7 @@ class SuricataSC:
             raise SuricataNetException(err)
 
         self.socket.settimeout(10)
-        #send version
+        # send version
         if self.verbose:
             print "SND: " + json.dumps({"version": VERSION})
         self.socket.send(json.dumps({"version": VERSION}))
@@ -135,7 +148,7 @@ class SuricataSC:
             raise SuricataReturnException("Unable to get message from server")
 
         if self.verbose:
-            print "RCV: "+ json.dumps(cmdret)
+            print "RCV: " + json.dumps(cmdret)
 
         if cmdret["return"] == "NOK":
             raise SuricataReturnException("Error: %s" % (cmdret["message"]))
@@ -146,7 +159,6 @@ class SuricataSC:
         if cmdret["return"] == "OK":
             self.cmd_list = cmdret["message"]["commands"]
             self.cmd_list.append("quit")
-
 
     def close(self):
         self.socket.close()
@@ -162,7 +174,7 @@ class SuricataSC:
                 arguments = None
                 if command.split(' ', 2)[0] in self.cmd_list:
                     if command == "quit":
-                        break;
+                        break
                     if "pcap-file " in command:
                         try:
                             [cmd, filename, output] = command.split(' ', 2)
@@ -207,7 +219,7 @@ class SuricataSC:
                     continue
 
                 cmdret = self.send_command(cmd, arguments)
-                #decode json message
+                # decode json message
                 if cmdret["return"] == "NOK":
                     print "Error:"
                     print json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': '))

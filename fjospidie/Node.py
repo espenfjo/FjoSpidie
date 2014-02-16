@@ -1,9 +1,11 @@
 class Node:
+
     def __init__(self, hostname):
         self.label = hostname
         self.id = None
         self.status = None
         self.parents = []
+
     def set_status(self, status):
         self.status = status
 
@@ -27,7 +29,6 @@ class Node:
                     break
         if not already_exists:
             self.parents.append(node)
-
 
     def dotnode(self):
         return "node" + str(self.id)

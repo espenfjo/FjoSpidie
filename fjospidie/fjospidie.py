@@ -17,7 +17,10 @@ import importlib
 
 nodes = []
 parsers = []
+
+
 class FjoSpidie:
+
     def __init__(self, config):
         self.config = config
 
@@ -30,18 +33,18 @@ class FjoSpidie:
         global nodes
 
         logging.info("Starting FjoSpidie 2.0")
-        starttime  = datetime.now()
+        starttime = datetime.now()
         ids_engine = None
-        tempdir    = tempfile.mkdtemp(dir="/mnt/fjospidie")
+        tempdir = tempfile.mkdtemp(dir="/mnt/fjospidie")
 
         if self.config.suricata:
             from engine.SuricataEngine import SuricataEngine
         else:
             from engine.SnortEngine import SnortEngine
 
-        report     = Report(starttime, self.config)
+        report = Report(starttime, self.config)
         proxy_port = random.randint(20000, 65534)
-        start_url  = urlparse(self.config.url)
+        start_url = urlparse(self.config.url)
         nodes.append(Node(start_url.hostname))
         nodes[0].set_status(200)
 
@@ -57,10 +60,10 @@ class FjoSpidie:
             pcap_path = pcap_engine.pcap_path
 
         connections = webrunner.find_external_connections(har)
-        entries     = har.entries
+        entries = har.entries
         report.insert_entries(entries)
         if self.config.parsers:
-            for parser in self.config.parsers,:
+            for parser in self.config.parsers, :
                 package = "fjospidie.engine.parser.{}".format(parser)
                 try:
                     imported = importlib.import_module(package)
@@ -74,9 +77,10 @@ class FjoSpidie:
 
         if not self.config.nopcap:
             if self.config.suricata:
-                ids_engine   = SuricataEngine(self.config, report, connections, tempdir, pcap_path, "/mnt/fjospidie/socket")
+                ids_engine = SuricataEngine(self.config, report, connections, tempdir,
+                                            pcap_path, "/mnt/fjospidie/socket")
             else:
-                ids_engine   = SnortEngine(report, connections, self.config.snort_config, pcap_path)
+                ids_engine = SnortEngine(report, connections, self.config.snort_config, pcap_path)
 
             ids_engine.start()
 

@@ -9,7 +9,9 @@ import inspect
 import uuid
 import psycopg2
 
+
 class PcapEngine(threading.Thread):
+
     def __init__(self, config, report, pcap_folder):
         threading.Thread.__init__(self)
         self.pcap_path = None
@@ -23,9 +25,10 @@ class PcapEngine(threading.Thread):
         snaplen = 64 * 1024
         timeout = 1
         if 'bpf' in self.config:
-            bpf = "{} and not (host {} and port {})".format(self.config.bpf, self.config.database_host,self.config.database_port)
+            bpf = "{} and not (host {} and port {})".format(
+                self.config.bpf, self.config.database_host, self.config.database_port)
         else:
-            bpf = "not (host {} and port {})".format(self.config.database_host,self.config.database_port)
+            bpf = "not (host {} and port {})".format(self.config.database_host, self.config.database_port)
 
         pcap_file = tempfile.NamedTemporaryFile(prefix="snort", suffix="pcap", delete=False, dir=self.pcap_folder)
         self.pcap_path = pcap_file.name
@@ -35,10 +38,10 @@ class PcapEngine(threading.Thread):
         self.p.setfilter(bpf, 0, 0)
         dumper = self.p.dump_open(self.pcap_path)
 
-        self.p.loop(-1,dumper)
+        self.p.loop(-1, dumper)
 
     def find_default_adapter(self):
-        route = subprocess.Popen(['/usr/bin/env', "netstat","-rn"], stdout=subprocess.PIPE)
+        route = subprocess.Popen(['/usr/bin/env', "netstat", "-rn"], stdout=subprocess.PIPE)
         default = None
         while True:
             line = route.stdout.readline()
@@ -64,4 +67,5 @@ class PcapEngine(threading.Thread):
         with open(self.pcap_path, mode='rb') as file:
             pcap = file.read()
         logging.debug("Adding " + self.pcap_path + " to database")
-        self.report.insertp("INSERT INTO pcap (report_id, data, uuid) VALUES (%s,%s, %s)",(self.report.rid,psycopg2.Binary(pcap), uuid.uuid4() ))
+        self.report.insertp("INSERT INTO pcap (report_id, data, uuid) VALUES (%s,%s, %s)",
+                            (self.report.rid, psycopg2.Binary(pcap), uuid.uuid4()))

@@ -10,7 +10,9 @@ import psycopg2
 
 URLs = []
 
+
 class WebRunner:
+
     def __init__(self, report):
         self.report = report
 
@@ -28,7 +30,8 @@ class WebRunner:
         if config.referer:
             referer = config.referer
         else:
-            referer   = 'http://www.google.com/search?q={}+&oq={}&oe=utf-8&rls=org.mozilla:en-US:official&client=firefox-a&channel=fflb&gws_rd=cr'.format(config.url, config.url)
+            referer = 'http://www.google.com/search?q={}+&oq={}&oe=utf-8&rls=org.mozilla:en-US:official&client=firefox-a&channel=fflb&gws_rd=cr'.format(
+                config.url, config.url)
 
         if config.useragent:
             useragent = config.useragent
@@ -42,16 +45,16 @@ class WebRunner:
         server = Server("lib/browsermob/bin/browsermob-proxy", {'port': port})
         server.start()
         proxy = server.create_proxy()
-        proxy.headers({'User-Agent': useragent, 'Accept-Encoding': "", 'Connection':'Close'})
+        proxy.headers({'User-Agent': useragent, 'Accept-Encoding': "", 'Connection': 'Close'})
 
-        request_js=(
+        request_js = (
             'var referer = request.getProxyRequest().getField("Referer");'
             'addReferer(request);'
-               'function addReferer(r){'
-                   'if (! referer ) {'
-                       'r.addRequestHeader("Referer","'+referer+'");'
-                   '}'
-                   'return;'
+            'function addReferer(r){'
+            'if (! referer ) {'
+            'r.addRequestHeader("Referer","' + referer + '");'
+            '}'
+            'return;'
             '}')
         proxy.request_interceptor(request_js)
         if config.firefoxprofile:
@@ -73,8 +76,9 @@ class WebRunner:
         firefox_profile.set_preference("network.proxy.type", 1)
         firefox_profile.set_proxy(proxy.selenium_proxy())
         try:
-            webdriver = WebDriver(firefox_profile)                               
-            proxy.new_har(start_url.hostname, options={"captureHeaders":"true", "captureContent":"true", "captureBinaryContent":"true"})
+            webdriver = WebDriver(firefox_profile)
+            proxy.new_har(start_url.hostname,
+                          options={"captureHeaders": "true", "captureContent": "true", "captureBinaryContent": "true"})
             self.analyse_page(webdriver, start_url)
             har = proxy.har
             logging.info("Stopping WebRunner")
@@ -88,7 +92,6 @@ class WebRunner:
             webdriver.quit()
             server.stop()
         return har
-
 
     def analyse_page(self, webdriver, start_url):
         global URLs
@@ -104,8 +107,8 @@ class WebRunner:
 
     def add_scr_to_db(self, screenshot):
         logging.debug("Adding screenshot to database")
-        self.report.insertp("INSERT INTO screenshot (report_id, image) VALUES (%s,%s)",(self.report.rid,psycopg2.Binary(screenshot)))
-
+        self.report.insertp("INSERT INTO screenshot (report_id, image) VALUES (%s,%s)",
+                            (self.report.rid, psycopg2.Binary(screenshot)))
 
     def find_external_connections(self, harlog):
         connections = []
@@ -113,7 +116,6 @@ class WebRunner:
             if entry.server_ip_address:
                 if not self.is_old(entry.server_ip_address, connections):
                     connections.append(entry.server_ip_address)
-
 
         logging.debug(connections)
         return connections

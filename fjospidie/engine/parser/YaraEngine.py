@@ -4,7 +4,9 @@ import fjospidie
 import threading
 import os
 
+
 class YaraEngine(threading.Thread):
+
     def __init__(self, config, report, entries):
         threading.Thread.__init__(self)
         logging.info("Initialising YaraEngine")
@@ -23,7 +25,6 @@ class YaraEngine(threading.Thread):
             return
 
         self.rules = yara.compile(r)
-
 
     def run(self):
         if not self.rules:

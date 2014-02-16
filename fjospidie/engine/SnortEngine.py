@@ -2,7 +2,10 @@ import threading
 import logging
 import subprocess
 from snort.SnortAlert import SnortAlert
+
+
 class SnortEngine(threading.Thread):
+
     def __init__(self, report, connections, snort_config, pcap_path):
         threading.Thread.__init__(self)
         self.connections = connections
@@ -19,7 +22,8 @@ class SnortEngine(threading.Thread):
             external_net += connection + ','
         external_net += "]"
 
-        snort_command = ["snort", "-c", self.snort_config, "-A", "console", "-q", "-N", "-r", self.pcap_path, "-S", "EXTERNAL_NET=" + external_net]
+        snort_command = ["snort", "-c", self.snort_config, "-A", "console", "-q",
+                         "-N", "-r", self.pcap_path, "-S", "EXTERNAL_NET=" + external_net]
         logging.info("Running snort: " + " ".join(snort_command))
         snort = subprocess.Popen(snort_command, stdout=subprocess.PIPE)
         while True:
@@ -29,5 +33,5 @@ class SnortEngine(threading.Thread):
                 self.alerts.append(alert)
             else:
                 break
-        self.report.add_alerts( self.alerts)
+        self.report.add_alerts(self.alerts)
         logging.info("Stopping SnortEngine")

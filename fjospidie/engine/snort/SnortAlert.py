@@ -1,7 +1,10 @@
 import re
 from netaddr import IPNetwork, IPAddress
 from datetime import datetime
+
+
 class SnortAlert:
+
     def __init__(self, alert, httplog, config):
         self.config = config
         text_parts = alert.split("[**]")
@@ -17,8 +20,7 @@ class SnortAlert:
         self.http_request = None
         self.check_http(httplog)
 
-
-    def check_turnaround(self,src):
+    def check_turnaround(self, src):
         """Check if source of alert is us, if not is probably a http response"""
         return not IPAddress((src.split(':'))[0]) in IPNetwork(self.config.mynet)
 

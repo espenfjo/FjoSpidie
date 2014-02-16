@@ -1,4 +1,6 @@
 from Node import Node
+
+
 class ParentNode(Node):
 
     def __init__(self, hostname):
@@ -6,4 +8,4 @@ class ParentNode(Node):
         self.number_of_links = 1
 
     def incrementNumberOfLinks(self):
-        self.number_of_links+=1
+        self.number_of_links += 1
