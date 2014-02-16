@@ -1,8 +1,8 @@
-FROM tianon/debian:wheezy
+FROM tianon/debian:sid
 ENV DEBIAN_FRONTEND noninteractive
 RUN echo "deb http://packages.linuxmint.com debian import" >> /etc/apt/sources.list
 RUN apt-get -y update
-RUN apt-get install --force-yes -y -q python python-setuptools libyaml-dev libpq-dev python-dev libpcap-dev git net-tools openjdk-7-jre firefox xvfb graphviz snort
+RUN apt-get install --force-yes -y -q python python-setuptools libyaml-dev libpq-dev python-dev libpcap-dev net-tools openjdk-7-jre firefox xvfb graphviz python-yara
 
 
 RUN mkdir -p /opt/fjospidie
@@ -15,6 +15,7 @@ ADD fjospidie.conf /opt/fjospidie/
 ADD run.sh /opt/fjospidie/
 ADD lib/browsermob/userAgentString.txt /tmp/
 ADD lib/browsermob/userAgentString.properties /tmp/
+ADD yara/ /opt/fjospidie/yara
 
 RUN python /opt/fjospidie/ez_setup.py install
 ENV RUNNABLE_USER_DIR /opt/fjospidie
