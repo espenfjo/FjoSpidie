@@ -12,9 +12,7 @@ ADD fjospidie.py /opt/fjospidie/
 ADD lib/ /opt/fjospidie/lib
 ADD ez_setup.py /opt/fjospidie/
 ADD fjospidie.conf /opt/fjospidie/
-ADD run.sh /opt/fjospidie/
-ADD lib/browsermob/userAgentString.txt /tmp/
-ADD lib/browsermob/userAgentString.properties /tmp/
+ADD lib/browsermob/uas.xml /tmp/
 ADD yara/ /opt/fjospidie/yara
 
 RUN python /opt/fjospidie/ez_setup.py install
