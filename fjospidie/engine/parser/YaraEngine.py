@@ -12,7 +12,6 @@ class YaraEngine(threading.Thread):
         self.pcap_path = None
         self.config = config
         self.yara_rules = self.config.yara_rules
-        self._rules = dict()
         self.entries = entries
         self.report = report
         self.init_rules()
@@ -27,6 +26,10 @@ class YaraEngine(threading.Thread):
 
 
     def run(self):
+        if not self.rules:
+            logging.debug("Skipping YaraEngine scane since we have no rules".format(cid))
+            return
+
         logging.info("Starting YaraEngine")
         for entry in self.entries:
             harResponse = entry.response
