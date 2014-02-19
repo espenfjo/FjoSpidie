@@ -3,7 +3,8 @@ import logging
 import fjospidie
 import threading
 import os
-
+import base64
+import re
 
 class YaraEngine(threading.Thread):
 
@@ -40,7 +41,16 @@ class YaraEngine(threading.Thread):
 
             self.scan(harContent.text, entry.contentid)
 
-    def scan(self, data, cid):
+    def scan(self, rawdata, cid):
         logging.debug("Scanning cid: {}".format(cid))
+        data = rawdata
+        if self.isBase64(rawdata):
+            try:
+                data = base64.b64decode(rawdata).encode('utf-8')
+            except:
+                logging.info("Could not decode {}".format(cid))
         matches = self.rules.match(data=data.encode('utf-8'))
         self.report.add_yara_matches(matches, cid)
+
+    def isBase64(self, s):
+        return (len(s) % 4 == 0) and re.match('^[A-Za-z0-9+/]+[=]{0,2}$', s)
