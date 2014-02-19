@@ -919,7 +919,6 @@ rule bankers
     $pass24 = "smartftp" nocase wide ascii
     $pass25 = "Software\\Microsoft\\Internet Explorer\\IntelliForms\\Storage2" wide ascii
     $pass26 = "\\Ares\\My Shared Folder" wide ascii
-    $pass27 = ":String" fullword wide ascii
     $pass28 = "StringIndex" fullword wide ascii
     $pass29 = "e161255a" fullword wide ascii
     $pass30 = "5e7e8100" fullword wide ascii
@@ -1819,28 +1818,4 @@ rule bankers
 
 	condition:
 	any of them
-}
-
-rule browsers
-{
-    meta:
-    description = "Indicates attempt to modify browser behavior"
-    
-    strings:
-    $browser0 = "browser" nocase
-    $browser1 = "avant" nocase
-    $browser2 = "netscape" nocase fullword
-    $browser3 = "flock" nocase
-    $browser4 = "safari" nocase 
-    $browser5 = "chrome" nocase
-    $browser6 = "opera" nocase fullword
-    $browser7 = "mozilla" nocase
-    $browser8 = "firefox" nocase
-    $browser9 = "GreenBrowser" fullword
-    
-    $adobe1 = "Adobe Systems Incorporated" 
-    $adobe2 = "Adobe Systems Incorporated" wide
-    
-    condition:
-    (4 of ($browser*)) and not $adobe1 and not $adobe2
 }

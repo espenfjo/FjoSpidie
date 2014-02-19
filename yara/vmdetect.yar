@@ -73,6 +73,7 @@ rule vmdetect : vmdetect
         $virtualbox_mac_1b = "08:00:27"
         $virtualbox_mac_1c = "080027"
 
+        $copyright = "copyright" ascii nocase
     condition:
-        any of them
+        any of them and not $copyright
 }

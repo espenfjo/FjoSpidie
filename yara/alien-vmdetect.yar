@@ -79,7 +79,8 @@ rule vmdetect_misc : vmdetect
 		$virtualbox_mac_1a = "08-00-27"
 		$virtualbox_mac_1b = "08:00:27"
 
+                $copyright = "copyright" ascii nocase
 	condition:
-		2 of them
+		2 of them and not $copyright
 }
 
