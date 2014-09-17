@@ -5,6 +5,7 @@ from browsermobproxy import Server
 from browsermobproxy import Client
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from harpy.har import Har
 import psycopg2
 
@@ -73,13 +74,22 @@ class WebRunner:
                                        ication/msword;text/plain;application/octet")
         firefox_profile.set_preference("browser.helperApps.alwaysAsk.force", False)
         firefox_profile.set_preference("browser.download.manager.showWhenStarting", False)
+        firefox_profile.set_preference("security.mixed_content.block_active_content", False)
+        firefox_profile.set_preference("security.mixed_content.block_display_content", False)
+        firefox_profile.set_preference("extensions.blocklist.enabled", False)
         firefox_profile.set_preference("network.proxy.type", 1)
         firefox_profile.set_proxy(proxy.selenium_proxy())
+        firefox_profile.set_preference("webdriver.log.file", "/tmp/ff.log");
+        firefox_profile.set_preference("webdriver.log.driver", "DEBUG");
         try:
-            webdriver = WebDriver(firefox_profile)
+            capabilities = DesiredCapabilities.FIREFOX
+            capabilities['loggingPrefs'] = { 'browser':'ALL' }
+            webdriver = WebDriver(capabilities=capabilities, firefox_profile=firefox_profile)
             proxy.new_har(start_url.hostname,
                           options={"captureHeaders": "true", "captureContent": "true", "captureBinaryContent": "true"})
             self.analyse_page(webdriver, start_url)
+            for entry in webdriver.get_log('browser'):
+                    logging.info("Firefox: {}".format(entry))
             har = proxy.har
             logging.info("Stopping WebRunner")
             proxy.close()
