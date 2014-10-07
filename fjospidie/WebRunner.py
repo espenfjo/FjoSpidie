@@ -4,6 +4,7 @@ import sys
 from browsermobproxy import Server
 from browsermobproxy import Client
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from harpy.har import Har
@@ -84,7 +85,8 @@ class WebRunner:
         try:
             capabilities = DesiredCapabilities.FIREFOX
             capabilities['loggingPrefs'] = { 'browser':'ALL' }
-            webdriver = WebDriver(capabilities=capabilities, firefox_profile=firefox_profile)
+            binary = FirefoxBinary('/opt/fjospidie/firefox/firefox')
+            webdriver = WebDriver(capabilities=capabilities, firefox_profile=firefox_profile, firefox_binary=binary)
             proxy.new_har(start_url.hostname,
                           options={"captureHeaders": "true", "captureContent": "true", "captureBinaryContent": "true"})
             self.analyse_page(webdriver, start_url)
