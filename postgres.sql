@@ -1,3 +1,30 @@
+CREATE TABLE report (
+    id serial PRIMARY KEY,
+    url text,
+    starttime timestamp without time zone NOT NULL,
+    endtime timestamp without time zone,
+    uuid uuid
+);
+
+CREATE TABLE entry (
+    id serial PRIMARY KEY,
+    report_id integer NOT NULL REFERENCES report(id)
+);
+
+
+
+CREATE TABLE request (
+    id serial PRIMARY KEY,
+    entry_id integer REFERENCES entry(id),
+    bodysize integer,
+    headersize integer,
+    method text,
+    uri text,
+    httpversion text,
+    host text,
+    port integer
+);
+
 CREATE TABLE alert (
     id SERIAL PRIMARY KEY,
     report_id integer NOT NULL,
@@ -25,10 +52,6 @@ CREATE TABLE download (
 );
 
 
-CREATE TABLE entry (
-    id serial PRIMARY KEY,
-    report_id integer NOT NULL REFERENCES report(id)
-);
 
 
 CREATE TABLE graph (
@@ -61,28 +84,6 @@ CREATE TABLE pcap (
 );
 
 
-CREATE TABLE report (
-    id serial PRIMARY KEY,
-    url text,
-    starttime timestamp without time zone NOT NULL,
-    endtime timestamp without time zone,
-    uuid uuid
-);
-
-
-
-CREATE TABLE request (
-    id serial PRIMARY KEY,
-    entry_id integer REFERENCES entry(id)
-    bodysize integer,
-    headersize integer,
-    method text,
-    uri text,
-    httpversion text,
-    host text,
-    port integer
-);
-
 
 CREATE TABLE response (
     id serial PRIMARY KEY,
@@ -91,7 +92,7 @@ CREATE TABLE response (
     statustext text,
     status integer,
     bodysize integer,
-    headersize integer,
+    headersize integer
 );
 
 CREATE TABLE cookie (
