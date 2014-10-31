@@ -8,3 +8,4 @@ snort_config=/etc/snort/snort.conf
 mynet=172.16.0.0/12
 yara_rules=../../../yara/yara.rules
 firefoxprofile=firefox
+parsers=YaraEngine
