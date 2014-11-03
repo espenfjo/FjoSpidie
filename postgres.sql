@@ -34,6 +34,7 @@ CREATE TABLE alert (
     protocol character varying(10) DEFAULT NULL::character varying,
     from_ip text,
     to_ip text,
+    time text,
     request integer REFERENCES request(id),
     http_method text,
     http_request text
