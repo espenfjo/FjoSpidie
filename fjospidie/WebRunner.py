@@ -108,6 +108,7 @@ class WebRunner:
     def analyse_page(self, webdriver, start_url):
         global URLs
         current_page = webdriver.get(start_url.geturl())
+        time.sleep(2)
 
         try:
             screenshot = webdriver.get_screenshot_as_png()
