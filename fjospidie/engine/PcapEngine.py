@@ -7,16 +7,14 @@ import threading
 import ctypes
 import inspect
 import uuid
-import psycopg2
-
+import hashlib
 
 class PcapEngine(threading.Thread):
 
-    def __init__(self, config, report, pcap_folder):
+    def __init__(self, spidie, pcap_folder):
         threading.Thread.__init__(self)
         self.pcap_path = None
-        self.report = report
-        self.config = config
+        self.spidie = spidie
         self.pcap_folder = pcap_folder
 
     def run(self):
@@ -24,11 +22,11 @@ class PcapEngine(threading.Thread):
         self.p = pcap.pcapObject()
         snaplen = 64 * 1024
         timeout = 1
-        if 'bpf' in self.config:
+        if 'bpf' in self.spidie.config:
             bpf = "{} and not (host {} and port {})".format(
-                self.config.bpf, self.config.database_host, self.config.database_port)
+                self.spidie.config.bpf, self.spidie.config.database_host, self.spidie.config.database_port)
         else:
-            bpf = "not (host {} and port {})".format(self.config.database_host, self.config.database_port)
+            bpf = "not (host {} and port {})".format(self.spidie.config.database_host, self.spidie.config.database_port)
 
         pcap_file = tempfile.NamedTemporaryFile(prefix="snort", suffix="pcap", delete=False, dir=self.pcap_folder)
         self.pcap_path = pcap_file.name
@@ -65,7 +63,18 @@ class PcapEngine(threading.Thread):
     def add_to_db(self):
         pcap = None
         with open(self.pcap_path, mode='rb') as file:
-            pcap = file.read()
+            pcap = file.read()            
         logging.debug("Adding " + self.pcap_path + " to database")
-        self.report.insertp("INSERT INTO pcap (report_id, data, uuid) VALUES (%s,%s, %s)",
-                            (self.report.rid, psycopg2.Binary(pcap), uuid.uuid4()))
+        md5 = self.__get_md5(pcap)
+        fs_id = None
+        if not self.spidie.database.fs.exists({"md5":md5}):
+            fs_id = self.spidie.database.fs.put(pcap, manipulate=False)
+        else:
+            grid_file = self.spidie.database.fs.get_version(md5=md5)
+            fs_id = grid_file._id
+        self.spidie.report.pcap_id = fs_id
+            
+    def __get_md5(self, data):
+        md5 = hashlib.md5()
+        md5.update(data)
+        return md5.hexdigest()

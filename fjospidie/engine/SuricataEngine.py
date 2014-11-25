@@ -10,21 +10,20 @@ from snort.SnortAlert import SnortAlert
 
 class SuricataEngine(threading.Thread):
 
-    def __init__(self, config, report, connections, suricata_dir, pcap_path, socket):
+    def __init__(self, spidie, connections, suricata_dir, pcap_path, socket):
         threading.Thread.__init__(self)
         self.socket = socket
         self.connections = connections
-        self.report = report
+        self.spidie = spidie
         self.suricata_dir = suricata_dir + "/suricata"
         self.pcap_path = pcap_path
         self.alerts = []
-        self.config = config
 
     def run(self):
         logging.info("Starting SuricataEngine")
         os.makedirs(self.suricata_dir)
         debug = False
-        if self.config.debug:
+        if self.spidie.config.debug:
             debug = True
 
         sc = SuricataSC(self.socket, verbose=debug)
@@ -54,12 +53,12 @@ class SuricataEngine(threading.Thread):
         with open(alert_file) as f:
             with open(http_file) as h:
                 for line in f:
-                    alert = SnortAlert(line, h, self.config)
+                    alert = SnortAlert(line, h, self.spidie.config)
                     self.alerts.append(alert)
                     h.seek(0)
 
-        self.report.add_alerts(self.alerts)
-        logging.info("Stopping SnortEngine")
+        self.spidie.report.alerts = self.alerts
+        logging.info("Stopping SuricataEngine")
 
     def check_ok(self, sc, count):
         cmdret = sc.send_command("pcap-current")

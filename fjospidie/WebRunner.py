@@ -9,18 +9,19 @@ from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from harpy.har import Har
 import psycopg2
-
+import hashlib
 URLs = []
 
 
 class WebRunner:
 
     def __init__(self, report):
-        self.report = report
+        self.spidie = report
 
     def run_webdriver(self, start_url, port, config, download_dir):
         global useragent
         global referer
+        webdriver = None
         urllib3_logger = logging.getLogger('urllib3')
         urllib3_logger.setLevel(logging.DEBUG)
         logging.info("Starting WebRunner")
@@ -48,7 +49,6 @@ class WebRunner:
         server.start()
         proxy = server.create_proxy()
         proxy.headers({'User-Agent': useragent, 'Accept-Encoding': "", 'Connection': 'Close'})
-
         request_js = (
             'var referer = request.getProxyRequest().getField("Referer");'
             'addReferer(request);'
@@ -85,7 +85,7 @@ class WebRunner:
         try:
             capabilities = DesiredCapabilities.FIREFOX
             capabilities['loggingPrefs'] = { 'browser':'ALL' }
-            binary = FirefoxBinary('/opt/fjospidie/firefox/firefox')
+            binary = FirefoxBinary('firefox/firefox')
             webdriver = WebDriver(capabilities=capabilities, firefox_profile=firefox_profile, firefox_binary=binary)
             proxy.new_har(start_url.hostname,
                           options={"captureHeaders": "true", "captureContent": "true", "captureBinaryContent": "true"})
@@ -101,7 +101,8 @@ class WebRunner:
         except Exception, e:
             logging.error(e)
             proxy.close()
-            webdriver.quit()
+            if webdriver:
+                webdriver.quit()
             server.stop()
         return har
 
@@ -119,8 +120,16 @@ class WebRunner:
 
     def add_scr_to_db(self, screenshot):
         logging.debug("Adding screenshot to database")
-        self.report.insertp("INSERT INTO screenshot (report_id, image) VALUES (%s,%s)",
-                            (self.report.rid, psycopg2.Binary(screenshot)))
+        md5 = self.__get_md5(screenshot)
+        fs_id = None
+        if not self.spidie.database.fs.exists({"md5":md5}):
+            fs_id = self.spidie.database.fs.put(screenshot, manipulate=False)
+        else:
+            grid_file = self.spidie.database.fs.get_version(md5=md5)
+            fs_id = grid_file._id
+            
+
+        self.spidie.report.screenshot_id = fs_id
 
     def find_external_connections(self, harlog):
         connections = []
@@ -138,3 +147,8 @@ class WebRunner:
                 return True
 
         return False
+
+    def __get_md5(self, data):
+        md5 = hashlib.md5()
+        md5.update(data)
+        return md5.hexdigest()

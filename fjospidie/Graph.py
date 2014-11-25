@@ -1,10 +1,10 @@
-import pydot
 import logging
+import hashlib
+import pydot
 from urlparse import urlparse
+
 from Node import Node
 from ParentNode import ParentNode
-import psycopg2
-
 
 class Graph:
 
@@ -12,15 +12,28 @@ class Graph:
         self.graph = pydot.Dot(graph_type='digraph', rankdir='LR', ratio='fill', bb="'0,0,1382,108'")
         self.entries = entries
         self.nodes = nodes
-        self.report = report
+        self.spidie = report
 
     def create_graph(self):
         self.calculate_nodes()
         self.fill_nodes()
         self.connect_nodes()
         data = self.graph.create_png()
-        self.report.insertp("INSERT INTO graph (report_id, graph) VALUES (%s,%s)",
-                            (self.report.rid, psycopg2.Binary(data)))
+        md5 = self.__get_md5(data)
+        fs_id = None
+
+        if not self.spidie.database.fs.exists({"md5":md5}):
+            fs_id = self.spidie.database.fs.put(data, manipulate=False)
+        else:
+            grid_file = self.spidie.database.fs.get_version(md5=md5)
+            fs_id = grid_file._id
+        self.spidie.report.graph_id = fs_id
+
+    def __get_md5(self, data):
+        md5 = hashlib.md5()
+        md5.update(data)
+        return md5.hexdigest()
+
 
     def calculate_nodes(self):
         """ This function loops through all HTTP connections and maps all

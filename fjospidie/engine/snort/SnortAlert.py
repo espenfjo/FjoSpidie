@@ -6,7 +6,7 @@ from datetime import datetime
 class SnortAlert:
 
     def __init__(self, alert, httplog, config):
-        self.config = config
+        self.__config = config
         text_parts = alert.split("[**]")
         self.alarm_text = (re.compile("\[\d+:\d+:\d+\]").split(text_parts[1]))[1].strip()
         space_parts = alert.split(" ")
@@ -18,19 +18,19 @@ class SnortAlert:
         self.src = (((text_parts[2].split("} "))[1]).split("-> "))[1].strip()
         self.http_method = None
         self.http_request = None
-        self.check_http(httplog)
+        self.__check_http(httplog)
 
-    def check_turnaround(self, src):
+    def __check_turnaround(self, src):
         """Check if source of alert is us, if not is probably a http response"""
-        return not IPAddress((src.split(':'))[0]) in IPNetwork(self.config.mynet)
+        return not IPAddress((src.split(':'))[0]) in IPNetwork(self.__config.mynet)
 
-    def check_http(self, httplog):
+    def __check_http(self, httplog):
         for line in httplog:
             time = (line.split(" "))[0]
             src_dst = (line.split("[**]"))[8]
             src = (src_dst.split(" "))[1].strip()
             dst = (src_dst.split(" "))[3].strip()
-            if self.check_turnaround(self.src):
+            if self.__check_turnaround(self.src):
                 real_src = dst
                 dst = src
                 src = real_src
@@ -39,6 +39,5 @@ class SnortAlert:
                 http_request = (line.split("[**]"))[1].lstrip()
                 host = (line.split(" "))[1].strip()
                 self.http_method = (line.split("[**]"))[4].strip()
-                self.http_request = "%://{}{}".format(host, http_request.strip())
-                print self.http_request
+                self.http_request = "^(http|https|ftp)://{}{}$".format(host, http_request.strip())
                 return

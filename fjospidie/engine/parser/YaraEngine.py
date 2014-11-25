@@ -6,17 +6,18 @@ import os
 import base64
 import re
 
+from YaraMatches import YaraMatches
+
 class YaraEngine(threading.Thread):
 
-    def __init__(self, config, report, entries):
+    def __init__(self, spidie):
         threading.Thread.__init__(self)
         logging.info("Initialising YaraEngine")
 
         self.pcap_path = None
-        self.config = config
+        self.config = spidie.config
         self.yara_rules = self.config.yara_rules
-        self.entries = entries
-        self.report = report
+        self.spidie = spidie
         self.init_rules()
 
     def init_rules(self):
@@ -29,28 +30,26 @@ class YaraEngine(threading.Thread):
 
     def run(self):
         if not self.rules:
-            logging.debug("Skipping YaraEngine scane since we have no rules".format(cid))
+            logging.debug("Skipping YaraEngine scane since we have no rules")
             return
 
         logging.info("Starting YaraEngine")
-        for entry in self.entries:
-            harResponse = entry.response
-            harContent = harResponse.content
-            if not harContent:
+        for idx, entry in enumerate(self.spidie.report.entries):
+            if not entry.content:
                 next
-
-            self.scan(harContent.text, entry.contentid)
-
-    def scan(self, rawdata, cid):
-        logging.debug("Scanning cid: {}".format(cid))
+            grid_file = self.spidie.database.fs.get_version(md5=entry.content.md5)
+            content = grid_file.read()
+            matches = self.scan(content)
+            entry.parser_match = YaraMatches(matches).matches
+            print entry.parser_match
+    def scan(self, rawdata):
         data = rawdata
         if self.isBase64(rawdata):
             try:
-                data = base64.b64decode(rawdata).encode('utf-8')
+                data = base64.b64decode(rawdata)
             except:
-                logging.info("Could not decode {}".format(cid))
-        matches = self.rules.match(data=data.encode('utf-8'))
-        self.report.add_yara_matches(matches, cid)
+                logging.info("Could not decode")
+        return self.rules.match(data=data)
 
     def isBase64(self, s):
         return (len(s) % 4 == 0) and re.match('^[A-Za-z0-9+/]+[=]{0,2}$', s)
