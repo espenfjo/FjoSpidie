@@ -6,5 +6,5 @@ setup(
     packages=find_packages(),
     dependency_links = ['https://github.com/espenfjo/pylibpcap/archive/0.6.4.2.tar.gz#egg=pylibpcap-0.6.4.2', 'lib/suricatasc'],
     install_requires=[
-        'selenium', 'pyaml', 'psycopg2', 'browsermob-proxy', 'harpy', 'pydot', 'pylibpcap','configobj','simplejson', 'cidrize'],
+        'selenium', 'pyaml', 'pymongo', 'browsermob-proxy', 'harpy', 'pydot', 'pylibpcap','configobj','simplejson', 'cidrize'],
 )

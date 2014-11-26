@@ -8,7 +8,6 @@ from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from harpy.har import Har
-import psycopg2
 import hashlib
 URLs = []
 
