@@ -41,7 +41,6 @@ class YaraEngine(threading.Thread):
             content = grid_file.read()
             matches = self.scan(content)
             entry.parser_match = YaraMatches(matches).matches
-            print entry.parser_match
     def scan(self, rawdata):
         data = rawdata
         if self.isBase64(rawdata):

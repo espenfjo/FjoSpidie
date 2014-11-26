@@ -16,11 +16,8 @@ class Transform(SONManipulator):
         """
         if isinstance(son, dict):
             for (key, value) in son.items():
-                print type(value)
-                
                 if isinstance(value, list):
                     for idx, foo in enumerate(value):
                         if isinstance(value, HTTPHeader):
-                            print "OHAIFDS"
                             son[key] = value.__dict__
         return son

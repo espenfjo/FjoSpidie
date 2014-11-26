@@ -1,10 +1,11 @@
+from argparse import Namespace
 from bson.objectid import ObjectId
 from datetime import datetime
+import logging
 from pymongo.son_manipulator import SONManipulator
-from uuid import uuid4
-from types import NoneType
-from argparse import Namespace
 import re
+from types import NoneType
+from uuid import uuid4
 
 from HTTPEntries import HTTPEntries
 from HTTPEntry import HTTPEntry
@@ -20,7 +21,6 @@ from engine.snort.SnortAlert import SnortAlert
 
 class Report:
     def __init__(self, config, starttime):
-
         if not config.uuid:
             self.uuid = str(uuid4())
         else:
@@ -37,7 +37,7 @@ class Report:
                 continue
             for entry in self.entries:
                 request = entry.request
-                print "Trying to match {} with {}".format(alert.http_request, request.url)
+                logging.debug("Trying to match {} with {}".format(alert.http_request, request.url))
                 m = re.match(alert.http_request, request.url)
                 if m:
                     alert.request_id = entry.num
@@ -71,6 +71,8 @@ class Transform(SONManipulator):
                             son[key][idx] = self.transform_incoming(item.__dict__, collection)
                         elif isinstance(item, HTTPHeader):
                             son[key][idx] = self.transform_incoming(item.__dict__, collection)
+                        elif isinstance(item, HTTPCookie):
+                            son[key][idx] = self.transform_incoming(item.__dict__, collection)
                         elif isinstance(item, YaraMatch):
                             son[key][idx] = self.transform_incoming(item.__dict__, collection)
                         elif isinstance(item, SnortAlert):
@@ -82,7 +84,7 @@ class Transform(SONManipulator):
                         elif isinstance(item, unicode):
                             pass
                         else:
-                            print "no inner match inner for {} type {}".format(item, type(item))
+                            logging.error("no inner match inner for {} type {}".format(item, type(item)))
                 elif isinstance(value, Namespace):
                     son[key] = None
                 elif isinstance(value, unicode):
@@ -98,7 +100,7 @@ class Transform(SONManipulator):
                 elif isinstance(value, NoneType):
                     pass
                 else:
-                    print "no match for {} type {}".format(value, type(value))
+                    logging.error("no match for {} type {}".format(value, type(value)))
         else:
-            print "No outer match for {} type {}".format(son, type(son))
+            logging.error("No outer match for {} type {}".format(son, type(son)))
         return son
