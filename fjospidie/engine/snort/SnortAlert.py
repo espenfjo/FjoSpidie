@@ -1,3 +1,4 @@
+import logging
 import re
 from netaddr import IPNetwork, IPAddress
 from datetime import datetime
@@ -22,6 +23,7 @@ class SnortAlert:
 
     def __check_turnaround(self, src):
         """Check if source of alert is us, if not is probably a http response"""
+        logging.debug("Checking if {} is in {}".format(src, self.__config.mynet))
         return not IPAddress((src.split(':'))[0]) in IPNetwork(self.__config.mynet)
 
     def __check_http(self, httplog):
