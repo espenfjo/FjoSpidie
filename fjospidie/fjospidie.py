@@ -1,10 +1,10 @@
 import argparse
 from datetime import datetime
+import hashlib
 import importlib
 import logging
 from mongodb import MongoDB
 import random
-import sys
 import tempfile
 from urlparse import urlparse
 
@@ -23,10 +23,10 @@ parsers = []
 
 
 class FjoSpidie:
-
     def __init__(self, config):
         self.config = config
-
+        self.database = None
+        self.report = None
         if self.config.verbose:
             logging.basicConfig(level=logging.INFO)
         if self.config.debug:
@@ -64,7 +64,7 @@ class FjoSpidie:
             pcap_engine.stop()
             pcap_path = pcap_engine.pcap_path
 
-        connections = webrunner.find_external_connections(har)
+        self.report.connections = webrunner.find_external_connections(har)
         self.report.entries = HTTPEntries(har.entries, self.database).entries
         if self.config.parsers:
             for parser in self.config.parsers, :
@@ -77,15 +77,11 @@ class FjoSpidie:
                     parser_engine.start()
                 except Exception, e:
                     logging.error("Error starting parser {}: {}".format(parser, e))
-                    next
+                    continue
 
         if not self.config.nopcap:
-            if self.config.suricata:
-                ids_engine = SuricataEngine(self, connections, tempdir,
-                                            pcap_path, "/mnt/fjospidie/socket")
-            else:
-                ids_engine = SnortEngine(self.report, connections, self.config.snort_config, pcap_path)
-
+            ids_engine = SuricataEngine(self, tempdir,
+                                        pcap_path, "/mnt/fjospidie/socket")
             ids_engine.start()
 
         graph = Graph(har.entries, nodes, self)
@@ -101,3 +97,4 @@ class FjoSpidie:
         self.report.endtime = datetime.now()
         self.database.collection.insert(self.report.__dict__)
         logging.info("Stopping FjoSpidie")
+

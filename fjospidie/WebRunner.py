@@ -1,25 +1,28 @@
 import logging
-import time
-import sys
 from browsermobproxy import Server
-from browsermobproxy import Client
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from harpy.har import Har
-import hashlib
-URLs = []
+from Utils import get_md5
+
+URLS = []
 
 
-class WebRunner:
-
+class WebRunner(object):
+    """
+    Stuff to run firefox and do the actual analysis of the web page
+    """
     def __init__(self, report):
         self.spidie = report
 
     def run_webdriver(self, start_url, port, config, download_dir):
-        global useragent
-        global referer
+        """
+        Run Selenium WebDriver
+        """
+        useragent = None
+        referer = None
         webdriver = None
         urllib3_logger = logging.getLogger('urllib3')
         urllib3_logger.setLevel(logging.DEBUG)
@@ -70,8 +73,7 @@ class WebRunner:
         firefox_profile.set_preference("browser.download.manager.showWhenStarting", False)
         firefox_profile.set_preference("browser.download.dir", download_dir)
         firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk",
-                                       "application/x-xpinstall;application/x-zip;application/x-zip-compressed;application/octet-stream;application/zip;application/pdf;appl\
-                                       ication/msword;text/plain;application/octet")
+                                       "application/x-xpinstall;application/x-zip;application/x-zip-compressed;application/octet-stream;application/zip;application/pdf;application/msword;text/plain;application/octet")
         firefox_profile.set_preference("browser.helperApps.alwaysAsk.force", False)
         firefox_profile.set_preference("browser.download.manager.showWhenStarting", False)
         firefox_profile.set_preference("security.mixed_content.block_active_content", False)
@@ -79,18 +81,18 @@ class WebRunner:
         firefox_profile.set_preference("extensions.blocklist.enabled", False)
         firefox_profile.set_preference("network.proxy.type", 1)
         firefox_profile.set_proxy(proxy.selenium_proxy())
-        firefox_profile.set_preference("webdriver.log.file", "/tmp/ff.log");
-        firefox_profile.set_preference("webdriver.log.driver", "DEBUG");
+        firefox_profile.set_preference("webdriver.log.file", "/tmp/ff.log")
+        firefox_profile.set_preference("webdriver.log.driver", "DEBUG")
         try:
             capabilities = DesiredCapabilities.FIREFOX
-            capabilities['loggingPrefs'] = { 'browser':'ALL' }
+            capabilities['loggingPrefs'] = {'browser':'ALL'}
             binary = FirefoxBinary('firefox/firefox')
             webdriver = WebDriver(capabilities=capabilities, firefox_profile=firefox_profile, firefox_binary=binary)
             proxy.new_har(start_url.hostname,
                           options={"captureHeaders": "true", "captureContent": "true", "captureBinaryContent": "true"})
             self.analyse_page(webdriver, start_url)
             for entry in webdriver.get_log('browser'):
-                    logging.info("Firefox: {}".format(entry))
+                logging.info("Firefox: {}".format(entry))
             har = proxy.har
             logging.info("Stopping WebRunner")
             proxy.close()
@@ -106,7 +108,10 @@ class WebRunner:
         return har
 
     def analyse_page(self, webdriver, start_url):
-        global URLs
+        """
+        Actual run of webdriver
+        """
+        global URLS
         current_page = webdriver.get(start_url.geturl())
 
         try:
@@ -115,39 +120,45 @@ class WebRunner:
         except Exception, e:
             logging.error("Whoops, cant take screenshot: {}".format(e))
 
-        URLs.append(current_page)
+        URLS.append(current_page)
 
     def add_scr_to_db(self, screenshot):
+        """
+        Add screenshot/render of the web page to the database
+        """
         logging.debug("Adding screenshot to database")
-        md5 = self.__get_md5(screenshot)
+        md5 = get_md5(screenshot)
         fs_id = None
         if not self.spidie.database.fs.exists({"md5":md5}):
             fs_id = self.spidie.database.fs.put(screenshot, manipulate=False)
         else:
             grid_file = self.spidie.database.fs.get_version(md5=md5)
             fs_id = grid_file._id
-            
+
 
         self.spidie.report.screenshot_id = fs_id
 
+    @staticmethod
+    def is_old(ipaddress, connections):
+        """
+        Check if we have seen the given IP address earlier
+        """
+        if ipaddress in connections:
+            return True
+
+        return False
+
+
     def find_external_connections(self, harlog):
+        """
+        Add each connection to the connection list
+        """
         connections = []
         for entry in harlog.entries:
             if entry.server_ip_address:
-                if not self.is_old(entry.server_ip_address, connections):
+                if not WebRunner.is_old(entry.server_ip_address, connections):
                     connections.append(entry.server_ip_address)
 
         logging.debug(connections)
         return connections
 
-    def is_old(self, ipaddress, connections):
-        for old_connection in connections:
-            if old_connection == ipaddress:
-                return True
-
-        return False
-
-    def __get_md5(self, data):
-        md5 = hashlib.md5()
-        md5.update(data)
-        return md5.hexdigest()

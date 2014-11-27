@@ -10,10 +10,9 @@ from snort.SnortAlert import SnortAlert
 
 class SuricataEngine(threading.Thread):
 
-    def __init__(self, spidie, connections, suricata_dir, pcap_path, socket):
+    def __init__(self, spidie, suricata_dir, pcap_path, socket):
         threading.Thread.__init__(self)
         self.socket = socket
-        self.connections = connections
         self.spidie = spidie
         self.suricata_dir = suricata_dir + "/suricata"
         self.pcap_path = pcap_path
