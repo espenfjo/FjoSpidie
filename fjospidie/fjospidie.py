@@ -1,6 +1,4 @@
-import argparse
 from datetime import datetime
-import hashlib
 import importlib
 import logging
 from mongodb import MongoDB
@@ -9,7 +7,6 @@ import tempfile
 from urlparse import urlparse
 
 
-from browsermobproxy import Server
 from configreader import parse_config
 from engine.PcapEngine import PcapEngine
 from Graph import Graph

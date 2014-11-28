@@ -1,11 +1,10 @@
 import logging
 import threading
-import socket
 import json
 import time
 import os
 from suricata.suricatasc import *
-from snort.SnortAlert import SnortAlert
+from suricata.SuricataAlert import SuricataAlert
 
 
 class SuricataEngine(threading.Thread):
@@ -52,7 +51,7 @@ class SuricataEngine(threading.Thread):
         with open(alert_file) as f:
             with open(http_file) as h:
                 for line in f:
-                    alert = SnortAlert(line, h, self.spidie.config)
+                    alert = SuricataAlert(line, h, self.spidie.config)
                     self.alerts.append(alert)
                     h.seek(0)
 

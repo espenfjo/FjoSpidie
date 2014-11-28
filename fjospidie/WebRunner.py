@@ -130,7 +130,7 @@ class WebRunner(object):
         md5 = get_md5(screenshot)
         fs_id = None
         if not self.spidie.database.fs.exists({"md5":md5}):
-            fs_id = self.spidie.database.fs.put(screenshot, manipulate=False)
+            fs_id = self.spidie.database.fs.put(screenshot, type="screenshot")
         else:
             grid_file = self.spidie.database.fs.get_version(md5=md5)
             fs_id = grid_file._id

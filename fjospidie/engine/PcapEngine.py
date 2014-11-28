@@ -1,13 +1,9 @@
 import logging
 import tempfile
-import fjospidie
 import pcap
 import subprocess
 import threading
-import ctypes
-import inspect
-import uuid
-import hashlib
+from fjospidie.Utils import get_md5
 
 class PcapEngine(threading.Thread):
 
@@ -28,7 +24,7 @@ class PcapEngine(threading.Thread):
         else:
             bpf = "not (host {} and port {})".format(self.spidie.config.database_host, self.spidie.config.database_port)
 
-        pcap_file = tempfile.NamedTemporaryFile(prefix="snort", suffix="pcap", delete=False, dir=self.pcap_folder)
+        pcap_file = tempfile.NamedTemporaryFile(prefix="suricata", suffix="pcap", delete=False, dir=self.pcap_folder)
         self.pcap_path = pcap_file.name
         logging.debug("PCAPing to " + self.pcap_path)
         dev = self.find_default_adapter()
@@ -57,24 +53,25 @@ class PcapEngine(threading.Thread):
             return parts[5]
 
     def stop(self):
+        """
+        Stop the tcpdump
+        """
         self.p.breakloop()
         self.add_to_db()
 
     def add_to_db(self):
-        pcap = None
-        with open(self.pcap_path, mode='rb') as file:
-            pcap = file.read()            
+        """
+        Add the pcap to the mongodb gridfs store
+        """
+        pcap_data = None
+        with open(self.pcap_path, mode='rb') as f:
+            pcap_data = f.read()
         logging.debug("Adding " + self.pcap_path + " to database")
-        md5 = self.__get_md5(pcap)
+        md5 = get_md5(pcap_data)
         fs_id = None
         if not self.spidie.database.fs.exists({"md5":md5}):
-            fs_id = self.spidie.database.fs.put(pcap, manipulate=False)
+            fs_id = self.spidie.database.fs.put(pcap_data, type="pcap")
         else:
             grid_file = self.spidie.database.fs.get_version(md5=md5)
             fs_id = grid_file._id
         self.spidie.report.pcap_id = fs_id
-            
-    def __get_md5(self, data):
-        md5 = hashlib.md5()
-        md5.update(data)
-        return md5.hexdigest()

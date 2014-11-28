@@ -5,8 +5,13 @@ from urlparse import urlparse
 
 from Node import Node
 from ParentNode import ParentNode
+from Utils import get_md5
 
-class Graph:
+class Graph(object):
+    """
+    Draw the connection graph PNG.
+    Much magic here
+    """
 
     def __init__(self, entries, nodes, report):
         self.graph = pydot.Dot(graph_type='digraph', rankdir='LR', ratio='fill', bb="'0,0,1382,108'")
@@ -19,24 +24,19 @@ class Graph:
         self.fill_nodes()
         self.connect_nodes()
         data = self.graph.create_png()
-        md5 = self.__get_md5(data)
+        md5 = get_md5(data)
         fs_id = None
 
         if not self.spidie.database.fs.exists({"md5":md5}):
-            fs_id = self.spidie.database.fs.put(data, manipulate=False)
+            fs_id = self.spidie.database.fs.put(data, type="graph")
         else:
             grid_file = self.spidie.database.fs.get_version(md5=md5)
             fs_id = grid_file._id
         self.spidie.report.graph_id = fs_id
 
-    def __get_md5(self, data):
-        md5 = hashlib.md5()
-        md5.update(data)
-        return md5.hexdigest()
-
-
     def calculate_nodes(self):
-        """ This function loops through all HTTP connections and maps all
+        """
+        This function loops through all HTTP connections and maps all
         Nodes and ParentNodes.
         If the response header has a 301/302 (rewrite/redirect) we add the
         Location as a Node, and sets the Node from the Host header as its parent.
@@ -46,7 +46,8 @@ class Graph:
 
         If we have a referer header, find its Node and set it as parent for this Node
         unless we already have this Node from a previous Location
-        header. Should always have its parent in the Node list."""
+        header. Should always have its parent in the Node list.
+        """
         for entry in self.entries:
             status = entry.response.status
             headers = entry.request.headers + entry.response.headers
@@ -72,23 +73,24 @@ class Graph:
                     if n:
                         node = n
                 elif header.name == "Referer":
-                    refURL = urlparse(header.value)
+                    referer_url = urlparse(header.value)
                     for pnode in self.nodes:
-                        if refURL.hostname == pnode.label:
+                        if referer_url.hostname == pnode.label:
                             if len(node.parents) == 0:
                                 node.set_parent(pnode, status)
 
     def add_node_if_not_exists(self, node, entry):
-        """Adds a Node to the Node list if it is not already in the list."""
-        alreadyExisting = False
+        """
+        Adds a Node to the Node list if it is not already in the list.
+        """
+        already_existing = False
         for n in self.nodes:
             # We have seen this connection earlier
             if n.label == node.label:
-                alreadyExisting = True
-                node = n
-                return node
+                already_existing = True
+                return n
 
-        if not alreadyExisting:
+        if not already_existing:
             node.har_entry = entry
             node.id = len(self.nodes) + 1
             self.nodes.append(node)
@@ -96,8 +98,10 @@ class Graph:
         return None
 
     def fill_nodes(self):
-        """Loops through a list of Node objects and adds
-          them to the GraphViz object as Dot Nodes."""
+        """
+        Loops through a list of Node objects and adds
+        them to the GraphViz object as Dot Nodes.
+        """
         for node in self.nodes:
             self.graph.add_node(pydot.Node(node.label))
 

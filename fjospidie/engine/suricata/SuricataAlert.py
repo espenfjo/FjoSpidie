@@ -1,22 +1,27 @@
 import logging
 import re
 from netaddr import IPNetwork, IPAddress
-from datetime import datetime
 
-
-class SnortAlert:
+class SuricataAlert(object):
+    """
+    Class representing a fast alert from Suricata
+    """
 
     def __init__(self, alert, httplog, config):
         self.__config = config
-        text_parts = alert.split("[**]")
-        self.alarm_text = (re.compile("\[\d+:\d+:\d+\]").split(text_parts[1]))[1].strip()
-        space_parts = alert.split(" ")
-        self.classification = ((text_parts[2].split("["))[1]).split("]")[0]
-        pri = (re.compile("\s+").split((((text_parts[2].split("["))[2]).split("]")[0])))[1]
-        self.priority = int(pri)
-        self.time = space_parts[0]
-        self.dst = (((text_parts[2].split("} "))[1]).split("->"))[0].strip()
-        self.src = (((text_parts[2].split("} "))[1]).split("-> "))[1].strip()
+        regex = r"(\S+)  \[\*\*\] \[(\d+):(\d+):(\d+)\] (.*?) \[\*\*\] \[Classification: (.*?)\] \[Priority: (\d+)\] {\S+} (.*?):(\d+) -> (.*?):(\d+)"
+        matcher = re.compile(regex)
+        result = matcher.match(alert)
+
+        self.time = result.group(1)
+        self.gid = result.group(2)
+        self.sid = result.group(3)
+        self.rule_revision = result.group(4)
+        self.alarm_text = result.group(5)
+        self.classification = result.group(6)
+        self.priority = int(result.group(7))
+        self.src = "{}:{}".format(result.group(8), result.group(9))
+        self.dst = "{}:{}".format(result.group(10), result.group(11))
         self.http_method = None
         self.http_request = None
         self.__check_http(httplog)
@@ -27,8 +32,11 @@ class SnortAlert:
         return not IPAddress((src.split(':'))[0]) in IPNetwork(self.__config.mynet)
 
     def __check_http(self, httplog):
+        """
+        Find the http request from Suricatas HTTP log to match with
+        requests from the HAR log
+        """
         for line in httplog:
-            time = (line.split(" "))[0]
             src_dst = (line.split("[**]"))[8]
             src = (src_dst.split(" "))[1].strip()
             dst = (src_dst.split(" "))[3].strip()

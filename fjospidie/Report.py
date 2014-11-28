@@ -16,7 +16,7 @@ from HTTPResponse import HTTPResponse
 from HTTPContent import HTTPContent
 from HTTPCookie import HTTPCookie
 from engine.parser.YaraMatch import YaraMatch
-from engine.snort.SnortAlert import SnortAlert
+from engine.suricata.SuricataAlert import SuricataAlert
 
 
 class Report:
@@ -75,7 +75,7 @@ class Transform(SONManipulator):
                             son[key][idx] = self.transform_incoming(item.__dict__, collection)
                         elif isinstance(item, YaraMatch):
                             son[key][idx] = self.transform_incoming(item.__dict__, collection)
-                        elif isinstance(item, SnortAlert):
+                        elif isinstance(item, SuricataAlert):
                             son[key][idx] = self.transform_incoming(item.__dict__, collection)
                         elif isinstance(item, dict):
                             son[key][idx] = self.transform_incoming(item, collection)
