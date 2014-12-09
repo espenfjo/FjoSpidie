@@ -1,6 +1,6 @@
 import logging
 import re
-from netaddr import IPNetwork, IPAddress
+from netaddr import IPNetwork, IPAddress, AddrFormatError
 
 class SuricataAlert(object):
     """
@@ -29,7 +29,11 @@ class SuricataAlert(object):
     def __check_turnaround(self, src):
         """Check if source of alert is us, if not is probably a http response"""
         logging.debug("Checking if {} is in {}".format(src, self.__config.mynet))
-        return not IPAddress((src.split(':'))[0]) in IPNetwork(self.__config.mynet)
+        try:
+            return not IPAddress((src.split(':'))[0]) in IPNetwork(self.__config.mynet)
+        except AddrFormatError as err:
+            logging.error("Error decoding IP {}: {}".format(src, err))
+            return False
 
     def __check_http(self, httplog):
         """
