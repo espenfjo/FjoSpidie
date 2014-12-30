@@ -12,9 +12,10 @@ class PcapEngine(threading.Thread):
         self.pcap_path = None
         self.spidie = spidie
         self.pcap_folder = pcap_folder
+        self.logger = logging.getLogger(__name__)
 
     def run(self):
-        logging.info("Starting PCAP engine")
+        self.logger.info("Starting PCAP engine")
         self.p = pcap.pcapObject()
         snaplen = 64 * 1024
         timeout = 1
@@ -26,7 +27,7 @@ class PcapEngine(threading.Thread):
 
         pcap_file = tempfile.NamedTemporaryFile(prefix="suricata", suffix="pcap", delete=False, dir=self.pcap_folder)
         self.pcap_path = pcap_file.name
-        logging.debug("PCAPing to " + self.pcap_path)
+        self.logger.debug("PCAPing to " + self.pcap_path)
         dev = self.find_default_adapter()
         self.p.open_live(dev, snaplen, 0, timeout)
         self.p.setfilter(bpf, 0, 0)
@@ -66,7 +67,7 @@ class PcapEngine(threading.Thread):
         pcap_data = None
         with open(self.pcap_path, mode='rb') as f:
             pcap_data = f.read()
-        logging.debug("Adding " + self.pcap_path + " to database")
+        self.logger.debug("Adding " + self.pcap_path + " to database")
         md5 = get_md5(pcap_data)
         fs_id = None
         if not self.spidie.database.fs.exists({"md5":md5}):

@@ -19,28 +19,22 @@ nodes = []
 parsers = []
 
 
-class FjoSpidie:
+class FjoSpidie(object):
     def __init__(self, config):
         self.config = config
         self.database = None
         self.report = None
-        if self.config.verbose:
-            logging.basicConfig(level=logging.INFO)
-        if self.config.debug:
-            logging.basicConfig(level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
 
     def run(self):
         global nodes
-
-        logging.info("Starting FjoSpidie 2.1")
+        self.logger.info("Starting FjoSpidie 2.1")
         starttime = datetime.now()
         ids_engine = None
         tempdir = tempfile.mkdtemp(dir="/mnt/fjospidie")
 
         if self.config.suricata:
             from engine.SuricataEngine import SuricataEngine
-        else:
-            from engine.SnortEngine import SnortEngine
 
         self.database = MongoDB(self.config)
         self.report = Report(self.config, starttime)
@@ -73,7 +67,7 @@ class FjoSpidie:
                     parsers.append(parser_engine)
                     parser_engine.start()
                 except Exception, e:
-                    logging.error("Error starting parser {}: {}".format(parser, e))
+                    self.logger.error("Error starting parser {}: {}".format(parser, e))
                     continue
 
         if not self.config.nopcap:
@@ -93,5 +87,4 @@ class FjoSpidie:
 
         self.report.endtime = datetime.now()
         self.database.collection.insert(self.report.__dict__)
-        logging.info("Stopping FjoSpidie")
-
+        self.logger.info("Stopping FjoSpidie")

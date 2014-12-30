@@ -16,9 +16,10 @@ class SuricataEngine(threading.Thread):
         self.suricata_dir = suricata_dir + "/suricata"
         self.pcap_path = pcap_path
         self.alerts = []
+        self.logger = logging.getLogger(__name__)
 
     def run(self):
-        logging.info("Starting SuricataEngine")
+        self.logger.info("Starting SuricataEngine")
         os.makedirs(self.suricata_dir)
         debug = False
         if self.spidie.config.debug:
@@ -28,10 +29,10 @@ class SuricataEngine(threading.Thread):
         try:
             sc.connect()
         except SuricataNetException, err:
-            logging.error("Unable to connect to socket %s: %s" % (self.socket, err))
+            self.logger.error("Unable to connect to socket %s: %s", self.socket, err)
             return
         except SuricataReturnException, err:
-            logging.error("Unable to negotiate version with server: %s" % (err))
+            self.logger.error("Unable to negotiate version with server: %s", err)
             return
 
         arguments = {}
@@ -40,9 +41,9 @@ class SuricataEngine(threading.Thread):
 
         cmdret = sc.send_command("pcap-file", arguments)
         if cmdret["return"] == "NOK":
-            logging.error(json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': ')))
+            self.logger.error(json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': ')))
         else:
-            logging.debug(json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': ')))
+            self.logger.debug(json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': ')))
 
         self.check_ok(sc, 0)
 
@@ -56,19 +57,19 @@ class SuricataEngine(threading.Thread):
                     h.seek(0)
 
         self.spidie.report.alerts = self.alerts
-        logging.info("Stopping SuricataEngine")
+        self.logger.info("Stopping SuricataEngine")
 
     def check_ok(self, sc, count):
         cmdret = sc.send_command("pcap-current")
         if cmdret["return"] == "NOK":
-            logging.error(json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': ')))
+            self.logger.error(json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': ')))
         else:
             if cmdret["message"] == "None":
-                logging.debug(json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': ')))
+                self.logger.debug(json.dumps(cmdret["message"], sort_keys=True, indent=4, separators=(',', ': ')))
             else:
                 if count < 60:
                     time.sleep(0.5)
                     count += 1
                     self.check_ok(sc, count)
                 else:
-                    logging.error("No result from suricata...")
+                    self.logger.error("No result from suricata...")

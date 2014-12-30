@@ -16,6 +16,7 @@ class WebRunner(object):
     """
     def __init__(self, report):
         self.spidie = report
+        self.logger = logging.getLogger(__name__)
 
     def run_webdriver(self, start_url, port, config, download_dir):
         """
@@ -26,7 +27,8 @@ class WebRunner(object):
         webdriver = None
         urllib3_logger = logging.getLogger('urllib3')
         urllib3_logger.setLevel(logging.DEBUG)
-        logging.info("Starting WebRunner")
+
+        self.logger.info("Starting WebRunner")
         firefox_profile = None
         server = None
         proxy = None
@@ -43,9 +45,9 @@ class WebRunner(object):
         else:
             useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:24.0) Gecko/20100101 Firefox/24.0'
 
-        logging.debug("Running with UserAgent: {}".format(useragent))
-        logging.debug("Running with Referer: {}".format(referer))
-        logging.debug("Checking URL: {}".format(config.url))
+        self.logger.debug("Running with UserAgent: {}".format(useragent))
+        self.logger.debug("Running with Referer: {}".format(referer))
+        self.logger.debug("Checking URL: {}".format(config.url))
 
         server = Server("lib/browsermob/bin/browsermob-proxy", {'port': port})
         server.start()
@@ -66,7 +68,7 @@ class WebRunner(object):
         else:
             firefox_profile = FirefoxProfile()
 
-        logging.debug("Using profile {}".format(firefox_profile.path))
+        self.logger.debug("Using profile {}".format(firefox_profile.path))
 
         firefox_profile.set_preference("security.OCSP.enabled", 0)
         firefox_profile.set_preference("browser.download.folderList", 2)
@@ -92,15 +94,15 @@ class WebRunner(object):
                           options={"captureHeaders": "true", "captureContent": "true", "captureBinaryContent": "true"})
             self.analyse_page(webdriver, start_url)
             for entry in webdriver.get_log('browser'):
-                logging.info("Firefox: {}".format(entry))
+                self.logger.info("Firefox: {}".format(entry))
             har = proxy.har
-            logging.info("Stopping WebRunner")
+            self.logger.info("Stopping WebRunner")
             proxy.close()
             server.stop()
             webdriver.quit()
             har = Har(har)
         except Exception, e:
-            logging.error(e)
+            self.logger.error(e)
             proxy.close()
             if webdriver:
                 webdriver.quit()
@@ -118,7 +120,7 @@ class WebRunner(object):
             screenshot = webdriver.get_screenshot_as_png()
             self.add_scr_to_db(screenshot)
         except Exception, e:
-            logging.error("Whoops, cant take screenshot: {}".format(e))
+            self.logger.error("Whoops, cant take screenshot: {}".format(e))
 
         URLS.append(current_page)
 
@@ -126,7 +128,7 @@ class WebRunner(object):
         """
         Add screenshot/render of the web page to the database
         """
-        logging.debug("Adding screenshot to database")
+        self.logger.debug("Adding screenshot to database")
         md5 = get_md5(screenshot)
         fs_id = None
         if not self.spidie.database.fs.exists({"md5":md5}):
@@ -159,6 +161,5 @@ class WebRunner(object):
                 if not WebRunner.is_old(entry.server_ip_address, connections):
                     connections.append(entry.server_ip_address)
 
-        logging.debug(connections)
+        self.logger.debug(connections)
         return connections
-

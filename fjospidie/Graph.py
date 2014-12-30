@@ -18,6 +18,7 @@ class Graph(object):
         self.entries = entries
         self.nodes = nodes
         self.spidie = report
+        self.logger = logging.getLogger(__name__)
 
     def create_graph(self):
         self.calculate_nodes()
@@ -57,14 +58,14 @@ class Graph(object):
                     if status == 301 or status == 302:
                         location_url = urlparse(header.value)
                         if not location_url.hostname:
-                            logging.warning("Could not parse " + header.value + " into a valid domain. Skipping.")
+                            self.logger.warning("Could not parse " + header.value + " into a valid domain. Skipping.")
                             break
                         location_node = Node(location_url.hostname)
                         location_node.set_status(status)
                         location_node.set_parent(node, status)
                         self.add_node_if_not_exists(location_node, entry)
                     else:
-                        logging.warning("Unknown STATUS id " + str(status) + " when having Location header")
+                        self.logger.warning("Unknown STATUS id " + str(status) + " when having Location header")
 
                 elif header.name == "Host":
                     node = Node(header.value)

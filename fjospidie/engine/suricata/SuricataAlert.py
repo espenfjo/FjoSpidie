@@ -12,6 +12,7 @@ class SuricataAlert(object):
         regex = r"(\S+)  \[\*\*\] \[(\d+):(\d+):(\d+)\] (.*?) \[\*\*\] \[Classification: (.*?)\] \[Priority: (\d+)\] {\S+} (.*?):(\d+) -> (.*?):(\d+)"
         matcher = re.compile(regex)
         result = matcher.match(alert)
+        self.logger = logging.getLogger(__name__)
 
         self.time = result.group(1)
         self.gid = result.group(2)
@@ -28,11 +29,11 @@ class SuricataAlert(object):
 
     def __check_turnaround(self, src):
         """Check if source of alert is us, if not is probably a http response"""
-        logging.debug("Checking if {} is in {}".format(src, self.__config.mynet))
+        self.logger.debug("Checking if {} is in {}".format(src, self.__config.mynet))
         try:
             return not IPAddress((src.split(':'))[0]) in IPNetwork(self.__config.mynet)
         except AddrFormatError as err:
-            logging.error("Error decoding IP {}: {}".format(src, err))
+            self.logger.error("Error decoding IP {}: {}".format(src, err))
             return False
 
     def __check_http(self, httplog):

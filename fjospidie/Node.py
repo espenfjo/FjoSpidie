@@ -18,11 +18,11 @@ class Node:
         already_exists = False
 
         for existing_pnode in self.parents:
-            """Does new parent match old parent? Aka have we had this connection
-            earlier"""
+            #Does new parent match old parent? Aka have we had this connection
+            # earlier
             if existing_pnode.label == node.label:
-                """We have an old connection, but do we have an old connection
-                   with the same HTTP status code (OK, REDIRECT etc)?"""
+                # We have an old connection, but do we have an old connection
+                # with the same HTTP status code (OK, REDIRECT etc)?
                 if status == self.status:
                     existing_pnode.incrementNumberOfLinks()
                     already_exists = True

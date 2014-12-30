@@ -15,9 +15,8 @@ class HTTPEntry:
         self.response = HTTPResponse(harResponse)
         self.request = HTTPRequest(harRequest)
         self.num = number
-        if harResponse.content:
-            self.content = HTTPContent(harResponse.content, database)
-            
-        if harResponse.cookies:
-            self.cookies = HTTPCookies(harResponse.cookies).cookies
+        if har_response.content:
+            self.content = HTTPContent(har_response.content, database)
 
+        if har_response.cookies:
+            self.cookies = HTTPCookies(har_response.cookies).cookies

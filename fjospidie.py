@@ -1,7 +1,7 @@
 from fjospidie.fjospidie import FjoSpidie
 import argparse
 from fjospidie.configreader import parse_config
-
+import logging
 
 def read_config():
     configfile = "fjospidie.conf"
@@ -39,5 +39,14 @@ def read_config():
     return args
 
 config = read_config()
+logging.basicConfig(format="%(asctime)s %(name)s %(levelname)s\t%(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logger = logging.getLogger("fjospidie")
+
+logger.setLevel(logging.INFO)
+if config.verbose:
+    logger.setLevel(logging.INFO)
+if config.debug:
+    logger.setLevel(logging.DEBUG)
+
 spidie = FjoSpidie(config)
 spidie.run()

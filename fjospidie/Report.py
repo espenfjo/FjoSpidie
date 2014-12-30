@@ -21,6 +21,8 @@ from engine.suricata.SuricataAlert import SuricataAlert
 
 class Report:
     def __init__(self, config, starttime):
+        self.logger = logging.getLogger(__name__)
+
         if not config.uuid:
             self.uuid = str(uuid4())
         else:
@@ -37,7 +39,7 @@ class Report:
                 continue
             for entry in self.entries:
                 request = entry.request
-                logging.debug("Trying to match {} with {}".format(alert.http_request, request.url))
+                self.logger.debug("Trying to match {} with {}".format(alert.http_request, request.url))
                 m = re.match(alert.http_request, request.url)
                 if m:
                     alert.request_id = entry.num
@@ -53,6 +55,7 @@ class Transform(SONManipulator):
         """
         Convert a Report object into a MongoDB eatable dict
         """
+        self.logger = logging.getLogger(__name__)
         if isinstance(son, dict):
             for (key, value) in son.items():
                 if isinstance(value, HTTPContent):
@@ -84,7 +87,7 @@ class Transform(SONManipulator):
                         elif isinstance(item, unicode):
                             pass
                         else:
-                            logging.error("no inner match inner for {} type {}".format(item, type(item)))
+                            self.logger.error("no inner match inner for {} type {}".format(item, type(item)))
                 elif isinstance(value, Namespace):
                     son[key] = None
                 elif isinstance(value, unicode):
@@ -93,14 +96,18 @@ class Transform(SONManipulator):
                     pass
                 elif isinstance(value, int):
                     pass
+                elif isinstance(value, float):
+                    pass
                 elif isinstance(value, ObjectId):
                     pass
                 elif isinstance(value, datetime):
                     pass
                 elif isinstance(value, NoneType):
                     pass
+                elif isinstance(value, logging.Logger):
+                    son[key] = None
                 else:
-                    logging.error("no match for {} type {}".format(value, type(value)))
+                    self.logger.error("no match for {} type {}".format(value, type(value)))
         else:
-            logging.error("No outer match for {} type {}".format(son, type(son)))
+            self.logger.error("No outer match for {} type {}".format(son, type(son)))
         return son
