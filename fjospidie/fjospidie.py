@@ -14,6 +14,7 @@ from HTTPEntries import HTTPEntries
 from Node import Node
 from Report import Report
 from WebRunner import WebRunner
+from Utils import ReportEnrichment
 
 nodes = []
 parsers = []
@@ -40,6 +41,8 @@ class FjoSpidie(object):
         self.report = Report(self.config, starttime)
         proxy_port = random.randint(20000, 65534)
         start_url = urlparse(self.config.url)
+        reportEnricher = ReportEnrichment(self, start_url)
+        reportEnricher.start()
         self.report.url = start_url.geturl()
         nodes.append(Node(start_url.hostname))
         nodes[0].set_status(200)
@@ -85,6 +88,7 @@ class FjoSpidie(object):
         for parse_engine in parsers:
             parse_engine.join()
 
+        reportEnricher.join()
         self.report.endtime = datetime.now()
         self.database.collection.insert(self.report.__dict__)
         self.logger.info("Stopping FjoSpidie")

@@ -1,4 +1,4 @@
-engines = ['PcapEngine', "SnortEngine"]
+engines = ['PcapEngine', "SuricataEngine"]
 
 
 def start():

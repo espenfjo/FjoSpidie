@@ -1,5 +1,7 @@
 import logging
 from urlparse import urlparse
+import dns.resolver
+from Utils import geoip
 
 from HTTPCookies import HTTPCookies
 from HTTPResponse import HTTPResponse
@@ -9,11 +11,31 @@ from HTTPContent import HTTPContent
 
 class HTTPEntry:
     def __init__(self, entry, number, database):
-        harRequest = entry.request
-        harResponse = entry.response
-        self.url = urlparse(harRequest.url).geturl()
-        self.response = HTTPResponse(harResponse)
-        self.request = HTTPRequest(harRequest)
+        logger = logging.getLogger(__name__)
+
+        har_request = entry.request
+        har_response = entry.response
+        url_object = urlparse(har_request.url)
+        domain = url_object.netloc
+        if ":" in domain:
+            domain = (domain.split(":"))[0]
+        try:
+            logger.debug("Trying to resolve %s", domain)
+            answers = dns.resolver.query(domain, 'A')
+            self.ip = answers[0].address
+            self.geoip = geoip(self.ip)
+        except dns.resolver.NXDOMAIN:
+            logger.error("No such domain %s", domain)
+        except dns.resolver.Timeout:
+            logger.error("Timed out while resolving %s", domain)
+        except dns.exception.DNSException:
+            logger.error("Unhandled exception while resolving %s", domain)
+
+
+        self.url = url_object.geturl()
+
+        self.response = HTTPResponse(har_response)
+        self.request = HTTPRequest(har_request)
         self.num = number
         if har_response.content:
             self.content = HTTPContent(har_response.content, database)
