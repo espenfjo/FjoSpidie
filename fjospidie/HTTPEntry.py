@@ -11,6 +11,8 @@ from HTTPContent import HTTPContent
 
 class HTTPEntry:
     def __init__(self, entry, number, database):
+        self.ip = None
+
         logger = logging.getLogger(__name__)
 
         har_request = entry.request
@@ -20,19 +22,21 @@ class HTTPEntry:
         if ":" in domain:
             domain = (domain.split(":"))[0]
         if entry.server_ip_address == '':
-                try:
-                    logger.debug("Trying to resolve %s", domain)
-                    answers = dns.resolver.query(domain, 'A')
-                    self.ip = answers[0].address
-                    self.geoip = geoip(self.ip)
-                except dns.resolver.NXDOMAIN:
-                    logger.error("No such domain %s", domain)
-                except dns.resolver.Timeout:
-                    logger.error("Timed out while resolving %s", domain)
-                except dns.exception.DNSException:
-                    logger.error("Unhandled exception while resolving %s", domain)
+            try:
+                logger.debug("Trying to resolve %s", domain)
+                answers = dns.resolver.query(domain, 'A')
+                self.ip = answers[0].address
+            except dns.resolver.NXDOMAIN:
+                logger.error("No such domain %s", domain)
+            except dns.resolver.Timeout:
+                logger.error("Timed out while resolving %s", domain)
+            except dns.exception.DNSException:
+                logger.error("Unhandled exception while resolving %s", domain)
         else:
             self.ip = entry.server_ip_address
+
+        if self.ip:
+            self.geoip = geoip(self.ip)
 
         self.url = url_object.geturl()
 

@@ -28,10 +28,12 @@ def geoip(ip):
     gisp = pygeoip.GeoIP('{}/GeoIPISP.dat'.format(r))
 
     data = {}
-
     data = gcity.record_by_addr(ip)
-    data['organisation'] = gorg.org_by_addr(ip)
-    data['isp'] = gisp.isp_by_addr(ip)
+    if data:
+        data['organisation'] = gorg.org_by_addr(ip)
+        data['isp'] = gisp.isp_by_addr(ip)
+    else:
+        print "WTF: {} is null!".format(ip)
     return data
 
 

@@ -1,6 +1,7 @@
 import logging
 import re
 from netaddr import IPNetwork, IPAddress, AddrFormatError
+from fjospidie.Utils import geoip
 
 class SuricataAlert(object):
     """
@@ -23,6 +24,8 @@ class SuricataAlert(object):
         self.priority = int(result.group(7))
         self.src = "{}:{}".format(result.group(8), result.group(9))
         self.dst = "{}:{}".format(result.group(10), result.group(11))
+        self.src_geoip = geoip(result.group(8))
+        self.dst_geoip = geoip(result.group(10))
         self.http_method = None
         self.http_request = None
         self.__check_http(httplog)
