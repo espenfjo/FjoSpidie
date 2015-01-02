@@ -59,5 +59,4 @@ https://github.com/espenfjo/fjospidie-interface
 
 
 
-See https://www.dropbox.com/s/eiwul3ipmqto57s/Screenshot%202013-10-26%2021.35.40.png for a picture of how it may look
-with the default web frontend looks.
+See http://i.imgur.com/z9Hh0SQ.png for a screenshot of how it may look with the default web frontend.
