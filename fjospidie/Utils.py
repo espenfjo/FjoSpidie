@@ -45,7 +45,6 @@ class ReportEnrichment(threading.Thread):
     def __init__(self, spidie, url):
         threading.Thread.__init__(self)
         self.spidie = spidie
-        self.geoip_path = self.spidie.config.geoip
         self.url = url
         self.logger = logging.getLogger(__name__)
 
