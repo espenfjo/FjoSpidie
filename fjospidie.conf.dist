@@ -3,6 +3,6 @@ database_port=5432
 suricata=True
 mynet=172.16.0.0/12
 yara_rules=../../../yara/yara.rules
-firefoxprofile=firefox
+#firefoxprofile=firefox
 parsers=YaraEngine
 bpf=not ip6 and not <YOURIP>

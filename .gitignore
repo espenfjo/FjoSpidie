@@ -1,6 +1,5 @@
 *.pyc
 *~
 #*
-Dockerfile
 firefox
 fjospidie.conf

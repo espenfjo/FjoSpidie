@@ -29,7 +29,7 @@ class FjoSpidie(object):
 
     def run(self):
         global nodes
-        self.logger.info("Starting FjoSpidie 2.1")
+        self.logger.info("Starting FjoSpidie 2.2")
         starttime = datetime.now()
         ids_engine = None
         tempdir = tempfile.mkdtemp(dir="/mnt/fjospidie")
