@@ -5,10 +5,11 @@ from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from harpy.har import Har
+from xvfbwrapper import Xvfb
+
 from Utils import get_md5
 
 URLS = []
-
 
 class WebRunner(object):
     """
@@ -89,6 +90,8 @@ class WebRunner(object):
             capabilities = DesiredCapabilities.FIREFOX
             capabilities['loggingPrefs'] = {'browser':'ALL'}
             binary = FirefoxBinary('firefox/firefox')
+            xvfb = Xvfb(width=1920, height=1080)
+            xvfb.start()
             webdriver = WebDriver(capabilities=capabilities, firefox_profile=firefox_profile, firefox_binary=binary)
             proxy.new_har(start_url.hostname,
                           options={"captureHeaders": "true", "captureContent": "true", "captureBinaryContent": "true"})
@@ -106,6 +109,7 @@ class WebRunner(object):
             proxy.close()
             if webdriver:
                 webdriver.quit()
+            xvfb.stop()
             server.stop()
         return har
 
