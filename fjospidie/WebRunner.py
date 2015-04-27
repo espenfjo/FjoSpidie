@@ -5,6 +5,7 @@ from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from harpy.har import Har
+import os
 from xvfbwrapper import Xvfb
 
 from Utils import get_md5
@@ -64,7 +65,9 @@ class WebRunner(object):
             'return;'
             '}')
         proxy.request_interceptor(request_js)
-        if config.firefoxprofile:
+        from types import NoneType
+        if config.firefoxprofile is not None and os.path.isdir(config.firefoxprofile):
+            self.logger.debug("Using existing firefox profile")
             firefox_profile = FirefoxProfile(profile_directory=config.firefoxprofile)
         else:
             firefox_profile = FirefoxProfile()
@@ -86,10 +89,14 @@ class WebRunner(object):
         firefox_profile.set_proxy(proxy.selenium_proxy())
         firefox_profile.set_preference("webdriver.log.file", "/tmp/ff.log")
         firefox_profile.set_preference("webdriver.log.driver", "DEBUG")
+
         try:
             capabilities = DesiredCapabilities.FIREFOX
             capabilities['loggingPrefs'] = {'browser':'ALL'}
-            binary = FirefoxBinary('firefox/firefox')
+            if os.path.exists("{}/firefox".format(firefox_profile.path)):
+                binary = FirefoxBinary("{}/firefox".format(firefox_profile.path))
+            else:
+                binary = FirefoxBinary("/usr/bin/firefox")
             xvfb = Xvfb(width=1920, height=1080)
             xvfb.start()
             webdriver = WebDriver(capabilities=capabilities, firefox_profile=firefox_profile, firefox_binary=binary)

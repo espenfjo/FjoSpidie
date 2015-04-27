@@ -21,20 +21,19 @@ def geoip(ip):
     """
     Lookup GeoIP information on ip
     """
-    r = "/usr/share/GeoIP/"
+    r = "/usr/share/GeoIP"
     if not os.path.exists(r):
         logging.error("GeoIP not found at {}".format(r))
         return
 
-    gorg = pygeoip.GeoIP('{}/GeoIPOrg.dat'.format(r))
+    gorg = pygeoip.GeoIP('{}/GeoIPASNum.dat'.format(r))
     gcity = pygeoip.GeoIP('{}/GeoIPCity.dat'.format(r))
-    gisp = pygeoip.GeoIP('{}/GeoIPISP.dat'.format(r))
 
     data = {}
     data = gcity.record_by_addr(ip)
     if data:
         data['organisation'] = gorg.org_by_addr(ip)
-        data['isp'] = gisp.isp_by_addr(ip)
+        data['isp'] = gorg.isp_by_addr(ip)
     else:
         print "WTF: {} is null!".format(ip)
     return data
