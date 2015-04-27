@@ -18,7 +18,10 @@ def get_md5(data):
     return md5.hexdigest()
 
 def geoip(ip):
-    r = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../geoip")
+    """
+    Lookup GeoIP information on ip
+    """
+    r = "/usr/share/GeoIP/"
     if not os.path.exists(r):
         logging.error("GeoIP not found at {}".format(r))
         return
