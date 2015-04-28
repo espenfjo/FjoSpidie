@@ -19,6 +19,7 @@ class WebRunner(object):
     def __init__(self, report):
         self.spidie = report
         self.logger = logging.getLogger(__name__)
+        self.xvfb = Xvfb(width=1920, height=1080)
 
     def run_webdriver(self, start_url, port, config, download_dir):
         """
@@ -91,14 +92,13 @@ class WebRunner(object):
         firefox_profile.set_preference("webdriver.log.driver", "DEBUG")
 
         try:
+            self.xvfb.start()
             capabilities = DesiredCapabilities.FIREFOX
             capabilities['loggingPrefs'] = {'browser':'ALL'}
             if os.path.exists("{}/firefox".format(firefox_profile.path)):
                 binary = FirefoxBinary("{}/firefox".format(firefox_profile.path))
             else:
                 binary = FirefoxBinary("/usr/bin/firefox")
-            xvfb = Xvfb(width=1920, height=1080)
-            xvfb.start()
             webdriver = WebDriver(capabilities=capabilities, firefox_profile=firefox_profile, firefox_binary=binary)
             proxy.new_har(start_url.hostname,
                           options={"captureHeaders": "true", "captureContent": "true", "captureBinaryContent": "true"})
@@ -116,7 +116,7 @@ class WebRunner(object):
             proxy.close()
             if webdriver:
                 webdriver.quit()
-            xvfb.stop()
+            self.xvfb.stop()
             server.stop()
         return har
 
