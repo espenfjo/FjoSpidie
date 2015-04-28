@@ -1,62 +1,31 @@
-FjoSpidie v2
+FjoSpidie v2.2
 =========
 
 FjoSpidie Honey Client
 
-This time the spider is written in Python instead of Java.
+This Honey Client will launch Firefox and open a given URL and create graphs and analyses based on what Firefox does.
 
-This version isnt done yet, but it is in development, and the code is lighter, and it has lighter requirements.
-
-This Honey Client will launch Firefox against a given URL and create a HAR of the URL.
-
-This HAR is used to create a PNG over all the domains visited.
-A tcpdump will also be recored of the session. The tcpdump will be run through snort to search for known threats or issues.
-Any autodownloaded file will be stored in the database for later review.
-
-
-Requirements
-============
-* xfvb
-* python
-* libpq-dev
-* java
-* python-setuptools
-* libyaml-dev
-* net-tools (netstat)
-* firefox
-* graphviz
-* snort or suricata
-* yara 2.0 (python-yara 2.0)
-
-
-Install requirements with `apt-get install --force-yes -y -q python python-setuptools libyaml-dev libpq-dev python-dev libpcap-dev git net-tools openjdk-7-jre firefox xvfb graphviz snort`
-
-Build
-=====
-`python ez_setup.py install`
-Or! If you want to run this in Docker. `docker build .`
-
-
-Configuration
-=============
-Configure `fjospidie.conf` from the `fjospidie.conf.dist` file.
+These graphs and analyses include:
+* PNG diagram of all connections made
+* TCPdump of all traffic
+* IDS findings via Suricata based on the tcpdump
+* Easy overview of every header and request/response
 
 Usage
 =====
-Run `python fjospidie.py --url http://www.google.com` to analyse google.com.
-or run `xvfb-run -a python fjospidie.py --url http://www.google.com` to run the spider in a xvfb server isntead
-of the default X11 server.
+Everything is done through Docker to ease installation and usage.
+
+Simply run `docker run espenfjo/fjospidie --url http://www.google.com` to analyse http://www.google.com.
+Run `docker run espenfjo/fjospidie --help` to see a complete list of available options.
 
 To run with suricata you need access to suricatas socket.
 If run through docker you can eg. run:
-`docker run -v /mnt/fjospidie:/mnt/fjospidie -i -t espenfjo/fjospidie:last bash -c "cd /opt/fjospidie; xvfb-run -a python fjospidie.py --url http://google.no/"`
+`docker run -v /mnt/fjospidie:/mnt/fjospidie -i -t espenfjo/fjospidie:last --url http://www.google.com/"`
 This will mount `/mnt/fjospidie` from the host inside your container. `/mnt/fjospidie` needs to contain your Suricata socket.
 
 Web Interface
 =============
 The FjoSpidie Web interface can be found here:
 https://github.com/espenfjo/fjospidie-interface
-
-
 
 See http://i.imgur.com/z9Hh0SQ.png for a screenshot of how it may look with the default web frontend.
