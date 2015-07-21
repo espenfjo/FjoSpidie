@@ -75,7 +75,7 @@ class FjoSpidie(object):
 
         if not self.config.nopcap:
             ids_engine = SuricataEngine(self, tempdir,
-                                        pcap_path, "/mnt/fjospidie/socket")
+                                        pcap_path, "/var/run/suricata/suricata-command.socket")
             ids_engine.start()
 
         graph = Graph(har.entries, nodes, self)
