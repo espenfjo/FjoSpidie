@@ -3,6 +3,7 @@ MAINTAINER espen@mrfjo.org
 ENV LC_ALL C
 ENV DEBIAN_FRONTEND noninteractive
 VOLUME /mnt/fjospidie
+VOLUME /var/run/suricata
 RUN echo "deb http://packages.linuxmint.com debian import" >> /etc/apt/sources.list && \
     echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" >> /etc/apt/sources.list && \
     sed -i  "s/jessie main/jessie main contrib non-free/" /etc/apt/sources.list && \
