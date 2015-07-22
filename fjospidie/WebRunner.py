@@ -90,6 +90,7 @@ class WebRunner(object):
         firefox_profile.set_proxy(proxy.selenium_proxy())
         firefox_profile.set_preference("webdriver.log.file", "/tmp/ff.log")
         firefox_profile.set_preference("webdriver.log.driver", "DEBUG")
+        firefox_profile.set_preference("browser.newtabpage.enhanced", False)
 
         try:
             self.xvfb.start()
