@@ -36,12 +36,12 @@ fi
 
 
 NET=$(ip a show dev eth0 |grep -w inet| awk '{print $2}' | sed "s/[0-9]*\/16/0\/16/") # Hack to replace IP with .0 :(
-bpf="not ip6 and not net $NET"
+# bpf="not ip6 and not net $NET"
 
 set_config database_host "$MONGO_HOST"
 set_config database_port "$MONGO_PORT"
 set_config mynet "$NET"
-set_config bpf $bpf
+# set_config bpf $bpf
 
 python fjospidie.py $@
 

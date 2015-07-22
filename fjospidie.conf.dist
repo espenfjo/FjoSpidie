@@ -5,4 +5,4 @@ mynet=172.16.0.0/12
 yara_rules=../../../yara/yara.rules
 #firefoxprofile=firefox
 parsers=YaraEngine
-bpf=not ip6 and not <YOURIP>
+bpf=not ip6

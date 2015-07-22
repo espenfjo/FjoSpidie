@@ -26,13 +26,14 @@ Everything is done through Docker to ease installation and usage.
 
 IF you run your own MongoDB database:
 Simply run `docker run -e MONGO_HOST=x.x.x.x espenfjo/fjospidie --url http://www.google.com` to analyse http://www.google.com.
+
 If you run a Docker MongoDB instance:
 Simply run `docker run --link some-mongo:mongo espenfjo/fjospidie --url http://www.google.com` to analyse http://www.google.com.
 
 Run `docker run espenfjo/fjospidie --help` to see a complete list of available options.
 
 To run with suricata you need access to suricatas socket.
-`docker run -v /mnt/fjospidie:/mnt/fjospidie --link some-mongo:mongo -i -t espenfjo/fjospidie --url http://www.google.com/"`
+`docker run -v /mnt/fjospidie:/mnt/fjospidie -v /var/run/suricata/:/var/run/suricata/ --link some-mongo:mongo -i -t espenfjo/fjospidie --url http://www.google.com/"`
 This will mount `/mnt/fjospidie` from the host inside your container. `/mnt/fjospidie` needs to contain your Suricata socket.
 
 Web Interface
