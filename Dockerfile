@@ -12,6 +12,7 @@ RUN echo "deb http://packages.linuxmint.com debian import" >> /etc/apt/sources.l
 
 WORKDIR /opt/FjoSpidie
 RUN python ez_setup.py install && \
-    cp fjospidie.conf.dist fjospidie.conf
+    cp fjospidie.conf.dist fjospidie.conf && \
+    cp lib/browsermob/uas.xml /tmp
 
 ENTRYPOINT ["./entrypoint.sh"]
