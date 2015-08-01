@@ -92,6 +92,9 @@ class WebRunner(object):
         firefox_profile.set_preference("webdriver.log.driver", "DEBUG")
         firefox_profile.set_preference("browser.newtabpage.enhanced", False)
         firefox_profile.set_preference("browser.newtabpage.enabled", False)
+        firefox_profile.set_preference("browser.newtabpage.directory.ping", "")
+        firefox_profile.set_preference("browser.newtabpage.directory.source", "")
+        firefox_profile.set_preference("browser.search.geoip.url", "")
 
         try:
             self.xvfb.start()
